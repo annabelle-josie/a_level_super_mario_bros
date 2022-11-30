@@ -11,6 +11,7 @@ import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Rectangle2D.Float;
+import java.util.ArrayList;
 import javax.swing.*;
 
 
@@ -31,19 +32,21 @@ public class Frame extends JFrame {
     Boolean jumping = false;
     Boolean up = false; //Is moving up
 
-    Character[] characterArray = new Character[3];
-
     /*Things*/
     Mario mario;
 
-    Villain[] villainArray = new Villain[2];
+    ArrayList<Character> characterArray = new ArrayList<>();
+
+    ArrayList<Villain>  villainArray = new ArrayList<>();
     Villain goombaGary;
     Villain goombaBab;
+    Villain goombaCarl;
     int[] goombaPlacement;
 
-    GameObject[][] square;
+    //GameObject[][] square; //Ask Mr Watts, can you have a 2D ArrayList (if so, how??)
+    ArrayList<ArrayList<GameObject>> square = new ArrayList<>();
 
-    GameObject[] pipeArray;
+    ArrayList<GameObject> pipeArray = new ArrayList<>();
     GameObject pipe;
     GameObject pipe2;
     GameObject pipe3;
@@ -76,73 +79,46 @@ public class Frame extends JFrame {
         /*Instantiating variables*/
         mario = new Mario("src/resources/right/SmallStand.png", 100, 435, 65, 65);
 
-        villainArray = new Villain[2];
+        //villainArray = new Villain[2];
         goombaGary = new Villain(350, 435, 65, 65);
         goombaBab = new Villain(750, 435, 65, 65);
+        goombaCarl = new Villain(815, 435, 65, 65);
 
-        square = new GameObject[2][20];
+        //square = new GameObject[2][41];
+
+
         /*Make array of squares*/
         for (int c = 0; c < 2; c++) {
-            for (int r = 0; r < 20; r++) {
-                square[c][r] = new GameObject(r * 50, 550 - (c * 50), 50, 50);
+            square.add(new ArrayList<>());
+            for (int r = 0; r < 40; r++) {
+                //square[c][r] = new GameObject(r * 50, 550 - (c * 50), 50, 50);
+                square.get(c).add(r, new GameObject(r * 50, 550 - (c * 50), 50, 50));
             }
         }
 
-        pipeArray = new GameObject[3];
         pipe = new GameObject(450, 400, 75, 100);
-        pipe2 = new GameObject(850, 375, 75, 125);
+        pipe2 = new GameObject(900, 375, 75, 125);
         pipe3 = new GameObject(1200, 350, 75, 150);
 
         /*Arrays*/
-        villainArray[0] = goombaGary;
-        villainArray[1] = goombaBab;
+        villainArray.clear();
+        villainArray.add(goombaGary);
+        villainArray.add(goombaBab);
+        villainArray.add(goombaCarl);
 
-        characterArray[0] = mario;
-        characterArray[1] = goombaGary;
-        characterArray[2] = goombaBab;
+        characterArray.clear();
+        characterArray.add(mario);
+        characterArray.add(goombaGary);
+        characterArray.add(goombaBab);
+        characterArray.add(goombaCarl);
 
-        pipeArray[0] = pipe;
-        pipeArray[1] = pipe2;
-        pipeArray[2] = pipe3;
-
-    }
-
-    public void reset2(){
-        //In future these values could be read from a text file and a new level could be added
-        goombaPlacement = new int[6];
-        /*Instantiating variables*/
-        mario = new Mario("src/resources/right/SmallStand.png", 100, 435, 65, 65);
-
-        villainArray = new Villain[2];
-        goombaGary = new Villain(350, 435, 65, 65);
-        goombaBab = new Villain(750, 435, 65, 65);
-
-        square = new GameObject[2][20];
-        /*Make array of squares*/
-        for (int c = 0; c < 2; c++) {
-            for (int r = 0; r < 20; r++) {
-                square[c][r] = new GameObject(r * 50, 550 - (c * 50), 50, 50);
-            }
-        }
-
-        pipeArray = new GameObject[3];
-        pipe = new GameObject(450, 400, 75, 100);
-        pipe2 = new GameObject(850, 375, 75, 125);
-        pipe3 = new GameObject(1200, 350, 75, 150);
-
-        /*Arrays*/
-        villainArray[0] = goombaGary;
-        villainArray[1] = goombaBab;
-
-        characterArray[0] = mario;
-        characterArray[1] = goombaGary;
-        characterArray[2] = goombaBab;
-
-        pipeArray[0] = pipe;
-        pipeArray[1] = pipe2;
-        pipeArray[2] = pipe3;
+        pipeArray.clear();
+        pipeArray.add(pipe);
+        pipeArray.add(pipe2);
+        pipeArray.add(pipe3);
 
     }
+
 
     public void tick() {
         if (gameOver) { //Makes mario fall off-screen, then switch the screen to --GAME OVER--
@@ -170,8 +146,9 @@ public class Frame extends JFrame {
                         gameObject.setLeftX(gameObject.getLeftX() + 5);
                     }
                     for (int c = 0; c < 2; c++) {
-                        for (int r = 0; r < 20; r++) {
-                            square[c][r].setLeftX(square[c][r].getLeftX() + 5);
+                        for (int r = 0; r < 40; r++) {
+                            //square[c][r].setLeftX(square[c][r].getLeftX() + 5);
+                            square.get(c).get(r).setLeftX(square.get(c).get(r).getLeftX() + 5);
                         }
                     }
                 }
@@ -191,8 +168,9 @@ public class Frame extends JFrame {
                         gameObject.setLeftX(gameObject.getLeftX() - 5);
                     }
                     for (int c = 0; c < 2; c++) {
-                        for (int r = 0; r < 20; r++) {
-                            square[c][r].setLeftX(square[c][r].getLeftX() - 5);
+                        for (int r = 0; r < 40; r++) {
+                            //square[c][r].setLeftX(square[c][r].getLeftX() - 5);
+                            square.get(c).get(r).setLeftX(square.get(c).get(r).getLeftX() - 5);
                         }
                     }
                 }
@@ -236,11 +214,11 @@ public class Frame extends JFrame {
                 ImageIcon groundIcon = new ImageIcon("src/resources/others/ground.png");
                 Image ground = groundIcon.getImage();
                 for (int c = 0; c < 2; c++) {
-                    for (int r = 0; r < 20; r++) {
-                        g2.drawImage(ground, square[c][r].getLeftX(), square[c][r].getTopY(), square[c][r].getW(), square[c][r].getH(), this);
+                    for (int r = 0; r < 40; r++) {
+                        //g2.drawImage(ground, square[c][r].getLeftX(), square[c][r].getTopY(), square[c][r].getW(), square[c][r].getH(), this);
+                        g2.drawImage(ground, square.get(c).get(r).getLeftX(), square.get(c).get(r).getTopY(), square.get(c).get(r).getW(), square.get(c).get(r).getH(), this);
                     }
                 }
-
 
                 /*Villain Array*/
                 for (Villain villain : villainArray) {
@@ -324,14 +302,14 @@ public class Frame extends JFrame {
     public void collisionDetection() {
         int c = 1;
 
-        for (int r = 0; r < 20; r++) {
+        for (int r = 0; r < 40; r++) {
             //If touching the ground
-            if (mario.getBottomY() + 20 > square[c][r].getTopY()) { //If the bottom of mario after moving is further down (including by 0) than the top of the square
-                mario.moveDown(square[c][r].getTopY() - mario.getBottomY()); //Move down remaining distance (between 20 and 0)
+            if (mario.getBottomY() + 20 > square.get(c).get(r).getTopY()) { //If the bottom of mario after moving is further down (including by 0) than the top of the square
+                mario.moveDown(square.get(c).get(r).getTopY() - mario.getBottomY()); //Move down remaining distance (between 20 and 0)
                 mario.setCanMoveDown(false);
             }
             //If above ground
-            else if (mario.getBottomY() < square[c][r].getTopY()){ //If marios foot is higher than the top of the square
+            else if (mario.getBottomY() < square.get(c).get(r).getTopY()){ //If marios foot is higher than the top of the square
                 mario.setCanMoveDown(true);
             }
             //If ground not detected (hole?) <-- doesn't work

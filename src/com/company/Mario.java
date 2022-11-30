@@ -79,7 +79,6 @@ public class Mario extends Character {
                 theImage = "src/resources/right/smallJump.png";
             }
         }
-
     }
 
     public Boolean jump(Boolean up, int height){
