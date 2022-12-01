@@ -2,7 +2,6 @@
 Notes for next time
 - When falling off a pipe onto a Goomba, Mario dies. In the original game this does not happen, instead he kills them.
 The current algorithm uses jump functions to determine whether the Goomba should be killed. This is not going to work long term
-- Mario also (still) does not fall off the ground if there is none below him. This is because it checks only the Y axis not the X
  */
 
 package com.company;
@@ -18,6 +17,8 @@ import javax.swing.*;
 public class Frame extends JFrame {
     Frame.PaintSurface canvas = new Frame.PaintSurface();
     Timer t;
+    int totalMoved = 0;
+
     /*Key Listeners*/
     private Frame.KeyLis listener;
     static Boolean lkd = false;
@@ -74,49 +75,49 @@ public class Frame extends JFrame {
     }
 
     public void resetL1(){
+        /*All values cleared*/
+        totalMoved = 0;
+        square.clear();
+        villainArray.clear();
+        characterArray.clear();
+        pipeArray.clear();
+
+        /*Instantiating each item*/
         //In future these values could be read from a text file and a new level could be added
-        goombaPlacement = new int[6];
-        /*Instantiating variables*/
+        //Using code similar to: goombaPlacement = new int[6];
+        //Where the ints are read from the txt file
         mario = new Mario("src/resources/right/SmallStand.png", 100, 435, 65, 65);
 
-        //villainArray = new Villain[2];
         goombaGary = new Villain(350, 435, 65, 65);
         goombaBab = new Villain(750, 435, 65, 65);
         goombaCarl = new Villain(815, 435, 65, 65);
-
-        //square = new GameObject[2][41];
-
-
-        /*Make array of squares*/
-        for (int c = 0; c < 2; c++) {
-            square.add(new ArrayList<>());
-            for (int r = 0; r < 40; r++) {
-                //square[c][r] = new GameObject(r * 50, 550 - (c * 50), 50, 50);
-                square.get(c).add(r, new GameObject(r * 50, 550 - (c * 50), 50, 50));
-            }
-        }
 
         pipe = new GameObject(450, 400, 75, 100);
         pipe2 = new GameObject(900, 375, 75, 125);
         pipe3 = new GameObject(1200, 350, 75, 150);
 
+        /*Make array of squares*/
+        for (int r = 0; r < 2; r++) {
+            square.add(new ArrayList<>());
+            for (int c = 0; c < 40;  c++) {
+                //square[c][r] = new GameObject(r * 50, 550 - (c * 50), 50, 50);
+                square.get(r).add( c , new GameObject( c * 50, 550 - (r * 50), 50, 50));
+            }
+        }
+
         /*Arrays*/
-        villainArray.clear();
         villainArray.add(goombaGary);
         villainArray.add(goombaBab);
         villainArray.add(goombaCarl);
 
-        characterArray.clear();
         characterArray.add(mario);
         characterArray.add(goombaGary);
         characterArray.add(goombaBab);
         characterArray.add(goombaCarl);
 
-        pipeArray.clear();
         pipeArray.add(pipe);
         pipeArray.add(pipe2);
         pipeArray.add(pipe3);
-
     }
 
 
@@ -136,6 +137,7 @@ public class Frame extends JFrame {
             if (lkd) { //Move left
                 if (mario.canMoveLeft) {
                     mario.moveLeft(5);
+                    totalMoved = totalMoved - 5;
                     //Turn this into an array of arrays and go through all changing x
 
                     /*Villain Left*/
@@ -145,10 +147,10 @@ public class Frame extends JFrame {
                     for (GameObject gameObject : pipeArray) {
                         gameObject.setLeftX(gameObject.getLeftX() + 5);
                     }
-                    for (int c = 0; c < 2; c++) {
-                        for (int r = 0; r < 40; r++) {
+                    for (int r = 0; r < 2; r++) {
+                        for (int c = 0; c < 40;  c++) {
                             //square[c][r].setLeftX(square[c][r].getLeftX() + 5);
-                            square.get(c).get(r).setLeftX(square.get(c).get(r).getLeftX() + 5);
+                            square.get(r).get(c).setLeftX(square.get(r).get(c).getLeftX() + 5);
                         }
                     }
                 }
@@ -158,6 +160,7 @@ public class Frame extends JFrame {
             } else if (rkd) { //Move right
                 if (mario.canMoveRight){
                     mario.moveRight(5);
+                    totalMoved = totalMoved + 5;
                     //Turn this into an array of arrays and go through all changing x
 
                     /*Villain Right*/
@@ -167,10 +170,10 @@ public class Frame extends JFrame {
                     for (GameObject gameObject : pipeArray) {
                         gameObject.setLeftX(gameObject.getLeftX() - 5);
                     }
-                    for (int c = 0; c < 2; c++) {
-                        for (int r = 0; r < 40; r++) {
+                    for (int r = 0; r < 2; r++) {
+                        for (int c = 0; c < 40;  c++) {
                             //square[c][r].setLeftX(square[c][r].getLeftX() - 5);
-                            square.get(c).get(r).setLeftX(square.get(c).get(r).getLeftX() - 5);
+                            square.get(r).get(c).setLeftX(square.get(r).get(c).getLeftX() - 5);
                         }
                     }
                 }
@@ -213,10 +216,10 @@ public class Frame extends JFrame {
                 //Array of blocks for ground
                 ImageIcon groundIcon = new ImageIcon("src/resources/others/ground.png");
                 Image ground = groundIcon.getImage();
-                for (int c = 0; c < 2; c++) {
-                    for (int r = 0; r < 40; r++) {
+                for (int r = 0; r < 2; r++) {
+                    for (int c = 0; c < 40;  c++) {
                         //g2.drawImage(ground, square[c][r].getLeftX(), square[c][r].getTopY(), square[c][r].getW(), square[c][r].getH(), this);
-                        g2.drawImage(ground, square.get(c).get(r).getLeftX(), square.get(c).get(r).getTopY(), square.get(c).get(r).getW(), square.get(c).get(r).getH(), this);
+                        g2.drawImage(ground, square.get(r).get(c).getLeftX(), square.get(r).get(c).getTopY(), square.get(r).get(c).getW(), square.get(r).get(c).getH(), this);
                     }
                 }
 
@@ -300,24 +303,25 @@ public class Frame extends JFrame {
     }
 
     public void collisionDetection() {
-        int c = 1;
-
-        for (int r = 0; r < 40; r++) {
-            //If touching the ground
-            if (mario.getBottomY() + 20 > square.get(c).get(r).getTopY()) { //If the bottom of mario after moving is further down (including by 0) than the top of the square
-                mario.moveDown(square.get(c).get(r).getTopY() - mario.getBottomY()); //Move down remaining distance (between 20 and 0)
+        //Mushrooms must bounce against one another as well as the pipes, maybe this could extend the mario villain collision part?
+        int r = 1;
+        //This now works by stopping when the end of the array is found, if holes need to be added for levels (though I
+        //am debating this as I am not sure that it is necessary) then something else will need to be added.
+        //Current thinking for this is to add blank bricks by adding an attribute 'hole' to the class
+        //Of course this would also need to be added to the paint subroutine as well
+        int c = totalMoved/50 + 2;
+        try {
+            if (mario.getBottomY() + 20 > square.get(r).get(c).getTopY()) { //If the bottom of mario after moving is further down (including by 0) than the top of the square
+                mario.moveDown(square.get(r).get(c).getTopY() - mario.getBottomY()); //Move down remaining distance (between 20 and 0)
                 mario.setCanMoveDown(false);
             }
             //If above ground
-            else if (mario.getBottomY() < square.get(c).get(r).getTopY()){ //If marios foot is higher than the top of the square
+            else if (mario.getBottomY() < square.get(r).get(c).getTopY()){ //If marios foot is higher than the top of the square
                 mario.setCanMoveDown(true);
             }
-            //If ground not detected (hole?) <-- doesn't work
-            //Other stuff only accounts for Y values, maybe wrap all in an x value thing for extremes?
-            //Then will need multiple arrays for when there are gaps... Which would result in even more collision detection
-            //Or a way of finding out which block you are on?
+        } catch (Exception e) {
+            gameOver = true;
         }
-
 
         for (Character character : characterArray) {
             for (GameObject gameObject : pipeArray) { //This is an enhanced for loop - originally suggested by IntelliJ, loops through all items in a list
