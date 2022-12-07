@@ -12,7 +12,9 @@ import java.awt.event.KeyEvent;
 import java.awt.geom.Rectangle2D.Float;
 import java.util.ArrayList;
 import javax.swing.*;
-
+import java.io.File;  // Import the File class
+import java.io.FileNotFoundException;  // Import this class to handle errors
+import java.util.Scanner; // Import the Scanner class to read text files
 
 public class Frame extends JFrame {
     Frame.PaintSurface canvas = new Frame.PaintSurface();
@@ -38,14 +40,13 @@ public class Frame extends JFrame {
 
     ArrayList<Character> characterArray = new ArrayList<>();
 
-    ArrayList<Villain>  villainArray = new ArrayList<>();
+    ArrayList<Villain> villainArray = new ArrayList<>();
     Villain goombaGary;
     Villain goombaBab;
     Villain goombaCarl;
     int[] goombaPlacement;
 
-    //GameObject[][] square; //Ask Mr Watts, can you have a 2D ArrayList (if so, how??)
-    ArrayList<ArrayList<GameObject>> square = new ArrayList<>();
+    ArrayList<ArrayList<GameObject>> ground = new ArrayList<>();
 
     ArrayList<GameObject> pipeArray = new ArrayList<>();
     GameObject pipe;
@@ -58,7 +59,7 @@ public class Frame extends JFrame {
     }
 
     public Frame() {
-        this.setSize(600, 627); //627 to make up for bar at top
+        this.setSize(800, 627); //627 to make up for bar at top
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE); //Kills code on close
         this.setTitle("Mario");
         this.add(this.canvas); //Add the painted area
@@ -74,35 +75,63 @@ public class Frame extends JFrame {
         resetL1();
     }
 
+
     public void resetL1(){
         /*All values cleared*/
         totalMoved = 0;
-        square.clear();
+        ground.clear();
         villainArray.clear();
         characterArray.clear();
         pipeArray.clear();
 
         /*Instantiating each item*/
         //In future these values could be read from a text file and a new level could be added
-        //Using code similar to: goombaPlacement = new int[6];
+        //Using code similar to:
+        //goombaPlacement ArrayList, brick placement ArrayList, hidden ground placement ArrayList
         //Where the ints are read from the txt file
-        mario = new Mario("src/resources/right/SmallStand.png", 100, 435, 65, 65);
+        //I tried it, but it caused random problems that I couldn't track properly
 
-        goombaGary = new Villain(350, 435, 65, 65);
-        goombaBab = new Villain(750, 435, 65, 65);
-        goombaCarl = new Villain(815, 435, 65, 65);
+        mario = new Mario("src/resources/right/SmallStand.png", 100, 450, 50, 50);
+
+        goombaGary = new Villain(350, 450, 50, 50);
+        goombaBab = new Villain(750, 450, 50, 50);
+        goombaCarl = new Villain(815, 450, 50, 50);
 
         pipe = new GameObject(450, 400, 75, 100);
         pipe2 = new GameObject(900, 375, 75, 125);
         pipe3 = new GameObject(1200, 350, 75, 150);
 
-        /*Make array of squares*/
+        /*Make array of  grounds*/
         for (int r = 0; r < 2; r++) {
-            square.add(new ArrayList<>());
-            for (int c = 0; c < 40;  c++) {
-                //square[c][r] = new GameObject(r * 50, 550 - (c * 50), 50, 50);
-                square.get(r).add( c , new GameObject( c * 50, 550 - (r * 50), 50, 50));
+            ground.add(new ArrayList<>());
+            for (int c = 0; c < 80;  c++) {
+                ground.get(r).add( c , new GameObject( c * 50, 550 - (r * 50), 50, 50));
             }
+        }
+
+        for (int i = 0; i < 2; i++) {
+            ground.get(i).get(5).setHidden(true);
+        }
+        for (int i = 0; i < 2; i++) {
+            ground.get(i).get(6).setHidden(true);
+        }
+        for (int i = 0; i < 2; i++) {
+            ground.get(i).get(30).setHidden(true);
+        }
+        for (int i = 0; i < 2; i++) {
+            ground.get(i).get(31).setHidden(true);
+        }
+        for (int i = 0; i < 2; i++) {
+            ground.get(i).get(45).setHidden(true);
+        }
+        for (int i = 0; i < 2; i++) {
+            ground.get(i).get(46).setHidden(true);
+        }
+        for (int i = 0; i < 2; i++) {
+            ground.get(i).get(54).setHidden(true);
+        }
+        for (int i = 0; i < 2; i++) {
+            ground.get(i).get(55).setHidden(true);
         }
 
         /*Arrays*/
@@ -135,7 +164,7 @@ public class Frame extends JFrame {
                 villain.animate();
             }
             if (lkd) { //Move left
-                if (mario.canMoveLeft) {
+                if (mario.canMoveLeft && (totalMoved -5 > 0)) {
                     mario.moveLeft(5);
                     totalMoved = totalMoved - 5;
                     //Turn this into an array of arrays and go through all changing x
@@ -148,9 +177,9 @@ public class Frame extends JFrame {
                         gameObject.setLeftX(gameObject.getLeftX() + 5);
                     }
                     for (int r = 0; r < 2; r++) {
-                        for (int c = 0; c < 40;  c++) {
-                            //square[c][r].setLeftX(square[c][r].getLeftX() + 5);
-                            square.get(r).get(c).setLeftX(square.get(r).get(c).getLeftX() + 5);
+                        for (int c = 0; c < 80;  c++) {
+                            // ground[c][r].setLeftX( ground[c][r].getLeftX() + 5);
+                            ground.get(r).get(c).setLeftX( ground.get(r).get(c).getLeftX() + 5);
                         }
                     }
                 }
@@ -158,7 +187,7 @@ public class Frame extends JFrame {
                     mario.jump(false, 20); //Falling half of jump
                 }
             } else if (rkd) { //Move right
-                if (mario.canMoveRight){
+                if (mario.canMoveRight && (totalMoved +5 < 3900)){ //This value must be changed if length of level changes
                     mario.moveRight(5);
                     totalMoved = totalMoved + 5;
                     //Turn this into an array of arrays and go through all changing x
@@ -171,9 +200,9 @@ public class Frame extends JFrame {
                         gameObject.setLeftX(gameObject.getLeftX() - 5);
                     }
                     for (int r = 0; r < 2; r++) {
-                        for (int c = 0; c < 40;  c++) {
-                            //square[c][r].setLeftX(square[c][r].getLeftX() - 5);
-                            square.get(r).get(c).setLeftX(square.get(r).get(c).getLeftX() - 5);
+                        for (int c = 0; c < 80;  c++) {
+                            // ground[c][r].setLeftX( ground[c][r].getLeftX() - 5);
+                            ground.get(r).get(c).setLeftX( ground.get(r).get(c).getLeftX() - 5);
                         }
                     }
                 }
@@ -213,19 +242,21 @@ public class Frame extends JFrame {
                     Image pipeImg = pipeIcon.getImage();
                     g2.drawImage(pipeImg, gameObject.getLeftX(), gameObject.getTopY(), gameObject.getW(), gameObject.getH(), this);
                 }
+
                 //Array of blocks for ground
                 ImageIcon groundIcon = new ImageIcon("src/resources/others/ground.png");
-                Image ground = groundIcon.getImage();
+                Image groundImg = groundIcon.getImage();
                 for (int r = 0; r < 2; r++) {
-                    for (int c = 0; c < 40;  c++) {
-                        //g2.drawImage(ground, square[c][r].getLeftX(), square[c][r].getTopY(), square[c][r].getW(), square[c][r].getH(), this);
-                        g2.drawImage(ground, square.get(r).get(c).getLeftX(), square.get(r).get(c).getTopY(), square.get(r).get(c).getW(), square.get(r).get(c).getH(), this);
+                    for (int c = 0; c < 80;  c++) {
+                        if(!ground.get(r).get(c).isHidden()) {
+                            g2.drawImage(groundImg, ground.get(r).get(c).getLeftX(), ground.get(r).get(c).getTopY(), ground.get(r).get(c).getW(), ground.get(r).get(c).getH(), this);
+                        }
                     }
                 }
 
-                /*Villain Array*/
+                //Villain Array
                 for (Villain villain : villainArray) {
-                    if (!(villain.isDead())) {
+                    if (!(villain.isHidden())) {
                         ImageIcon villainIcon = new ImageIcon(villain.image());
                         Image villainImage = villainIcon.getImage();
                         g2.drawImage(villainImage, villain.getLeftX(), villain.getTopY(), villain.getW(), villain.getH(), this);
@@ -242,7 +273,7 @@ public class Frame extends JFrame {
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
                 //White background
-                Shape background = new Float(0.0F, 0.0F, 600.0F, 600.0F);
+                Shape background = new Float(000.0F, 0.0F, 800.0F, 600.0F);
                 g2.setPaint(Color.white);
                 g2.fill(background);
 
@@ -250,7 +281,9 @@ public class Frame extends JFrame {
                 ImageIcon ii = new ImageIcon("src/resources/gameOverScreen.png");
                 Image gameOverScreen;
                 gameOverScreen = ii.getImage();
-                g2.drawImage(gameOverScreen, 200, 200, 200, 200, this);
+                g2.drawImage(gameOverScreen, 300, 200, 200, 200, this);
+
+                JLabel label1 = new JLabel("Test");
             }
         }
     }
@@ -305,22 +338,19 @@ public class Frame extends JFrame {
     public void collisionDetection() {
         //Mushrooms must bounce against one another as well as the pipes, maybe this could extend the mario villain collision part?
         int r = 1;
-        //This now works by stopping when the end of the array is found, if holes need to be added for levels (though I
-        //am debating this as I am not sure that it is necessary) then something else will need to be added.
-        //Current thinking for this is to add blank bricks by adding an attribute 'hole' to the class
-        //Of course this would also need to be added to the paint subroutine as well
         int c = totalMoved/50 + 2;
-        try {
-            if (mario.getBottomY() + 20 > square.get(r).get(c).getTopY()) { //If the bottom of mario after moving is further down (including by 0) than the top of the square
-                mario.moveDown(square.get(r).get(c).getTopY() - mario.getBottomY()); //Move down remaining distance (between 20 and 0)
+        //Broken :( Only works when moving left
+        if (mario.getBottomY() + 20 > ground.get(r).get(c).getTopY()) { //If the bottom of mario after moving is further down (including by 0) than the top of the  ground
+            if (ground.get(r).get(c).isHidden()) { //If there is a hole
+                gameOver = true;
+            } else {
+                mario.moveDown(ground.get(r).get(c).getTopY() - mario.getBottomY()); //Move down remaining distance (between 20 and 0)
                 mario.setCanMoveDown(false);
             }
-            //If above ground
-            else if (mario.getBottomY() < square.get(r).get(c).getTopY()){ //If marios foot is higher than the top of the square
-                mario.setCanMoveDown(true);
-            }
-        } catch (Exception e) {
-            gameOver = true;
+        }
+        //If above ground
+        else if (mario.getBottomY() < ground.get(r).get(c).getTopY()) { //If marios foot is higher than the top of the  ground
+            mario.setCanMoveDown(true);
         }
 
         for (Character character : characterArray) {
@@ -336,7 +366,7 @@ public class Frame extends JFrame {
                             character.bounce();
                         }
                     } else {
-                            character.setCanMoveRight(true);
+                        character.setCanMoveRight(true);
                     }
                     //If on left-hand side
                     if (character.getLeftX() <= gameObject.getRightX() && character.getRightX() > gameObject.getLeftX()) {
@@ -363,7 +393,7 @@ public class Frame extends JFrame {
 
         /*Villain Collision with Mario*/
         for (Villain villain : villainArray) {
-            if (!villain.isDead()) {
+            if (!villain.isHidden()) {
                 if (mario.getRightX() > villain.getLeftX() && mario.getLeftX() < villain.getRightX()) {
                     if (mario.getBottomY() > villain.getTopY() && jumping && !up) {
                         //if jumping is true and up = false then he is falling and can squish
@@ -371,7 +401,7 @@ public class Frame extends JFrame {
                         villain.setH(20);
                         villain.setTopY(480);
                         mario.setJumpCount(10);
-                        villain.setDead(true);
+                        villain.setHidden(true);
                     } else if (mario.getBottomY() > villain.getTopY()) {
                         //If Gary kills Mario
                         gameOver = true;

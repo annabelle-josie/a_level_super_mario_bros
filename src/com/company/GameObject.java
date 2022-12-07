@@ -5,12 +5,14 @@ public class GameObject {
     protected int y;
     protected int w;
     protected int h;
+    protected boolean hidden;
 
     public GameObject(int xIN, int yIN, int wIN, int hIN){
         this.x = xIN;
         this.y = yIN;
         this.w = wIN;
         this.h = hIN;
+        hidden = false;
     }
 
     public void setTopY(int y) {
@@ -48,4 +50,12 @@ public class GameObject {
     }
 
     public void setW(int w){this.w = w;}
+
+    public void setHidden(Boolean hide){
+        hidden = hide;
+    }
+
+    public Boolean isHidden(){
+        return hidden;
+    }
 }

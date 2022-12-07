@@ -5,12 +5,10 @@ public class Villain extends Character{
     private int number;
     private String[] goombaSet = {"src/resources/others/goomba1.png", "src/resources/others/goomba2.png"};
     private int xChange = -1;
-    private Boolean isDead;
 
     public Villain (int xIN, int yIN, int wIN, int hIN){
         super(xIN, yIN, wIN, hIN);
         theImage = "src/resources/others/goomba2.png";
-        isDead = false;
     }
 
     public String image(){
@@ -26,13 +24,6 @@ public class Villain extends Character{
 
     public void bounce(){
         xChange = xChange * -1;
-    }
-
-    public void setDead(Boolean dead){
-        isDead = dead;
-    }
-    public Boolean isDead(){
-        return isDead;
     }
 
 }
