@@ -62,6 +62,7 @@ public class Frame extends JFrame {
         this.setSize(800, 627); //627 to make up for bar at top
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE); //Kills code on close
         this.setTitle("Mario");
+        resetL1();
         this.add(this.canvas); //Add the painted area
         this.setVisible(true);
 
@@ -72,7 +73,6 @@ public class Frame extends JFrame {
         /*Key Listeners*/
         this.listener = new Frame.KeyLis();
         this.addKeyListener(this.listener);
-        resetL1();
     }
 
 
@@ -92,14 +92,7 @@ public class Frame extends JFrame {
         //I tried it, but it caused random problems that I couldn't track properly
 
         mario = new Mario("src/resources/right/SmallStand.png", 100, 450, 50, 50);
-
-        goombaGary = new Villain(350, 450, 50, 50);
-        goombaBab = new Villain(750, 450, 50, 50);
-        goombaCarl = new Villain(815, 450, 50, 50);
-
-        pipe = new GameObject(450, 400, 75, 100);
-        pipe2 = new GameObject(900, 375, 75, 125);
-        pipe3 = new GameObject(1200, 350, 75, 150);
+        characterArray.add(mario);
 
         /*Make array of  grounds*/
         for (int r = 0; r < 2; r++) {
@@ -109,44 +102,39 @@ public class Frame extends JFrame {
             }
         }
 
-        for (int i = 0; i < 2; i++) {
-            ground.get(i).get(5).setHidden(true);
+        int current = 0;
+        try {
+            File inputFile = new File ("src/resources/level1.txt");
+            Scanner myReader = new Scanner(inputFile);
+            while (myReader.hasNextLine()){
+                String data = myReader.nextLine();
+                if(data.equals("")){
+                    current++;
+                } else {
+                    if (current == 0) {
+                        //Goombas
+                        String[] values = data.split(", ");
+                        villainArray.add(new Villain(Integer.parseInt(values[0]), Integer.parseInt(values[1]), 50, 50));
+                        characterArray.add(villainArray.get(villainArray.size()-1));
+                    } else if (current == 1) {
+                        //Pipes
+                        String[] values = data.split(", ");
+                        pipeArray.add(new GameObject(Integer.parseInt(values[0]), Integer.parseInt(values[1]), Integer.parseInt(values[2]), Integer.parseInt(values[3])));
+                    } else if (current == 2){
+                        //Holes
+                        for (int j = 0; j < 2 ; j++) {
+                            for (int i = 0; i < 2; i++) {
+                                ground.get(i).get(Integer.parseInt(data) + j).setHidden(true);
+                            }
+                        }
+                    }
+                }
+            }
+            myReader.close();
+        } catch (FileNotFoundException e){
+            System.out.println("Something went wrong");
+            e.printStackTrace();
         }
-        for (int i = 0; i < 2; i++) {
-            ground.get(i).get(6).setHidden(true);
-        }
-        for (int i = 0; i < 2; i++) {
-            ground.get(i).get(30).setHidden(true);
-        }
-        for (int i = 0; i < 2; i++) {
-            ground.get(i).get(31).setHidden(true);
-        }
-        for (int i = 0; i < 2; i++) {
-            ground.get(i).get(45).setHidden(true);
-        }
-        for (int i = 0; i < 2; i++) {
-            ground.get(i).get(46).setHidden(true);
-        }
-        for (int i = 0; i < 2; i++) {
-            ground.get(i).get(54).setHidden(true);
-        }
-        for (int i = 0; i < 2; i++) {
-            ground.get(i).get(55).setHidden(true);
-        }
-
-        /*Arrays*/
-        villainArray.add(goombaGary);
-        villainArray.add(goombaBab);
-        villainArray.add(goombaCarl);
-
-        characterArray.add(mario);
-        characterArray.add(goombaGary);
-        characterArray.add(goombaBab);
-        characterArray.add(goombaCarl);
-
-        pipeArray.add(pipe);
-        pipeArray.add(pipe2);
-        pipeArray.add(pipe3);
     }
 
 
@@ -337,22 +325,21 @@ public class Frame extends JFrame {
 
     public void collisionDetection() {
         //Mushrooms must bounce against one another as well as the pipes, maybe this could extend the mario villain collision part?
-        int r = 1;
-        int c = totalMoved/50 + 2;
-        //Broken :( Only works when moving left
-        if (mario.getBottomY() + 20 > ground.get(r).get(c).getTopY()) { //If the bottom of mario after moving is further down (including by 0) than the top of the  ground
-            if (ground.get(r).get(c).isHidden()) { //If there is a hole
-                gameOver = true;
-            } else {
-                mario.moveDown(ground.get(r).get(c).getTopY() - mario.getBottomY()); //Move down remaining distance (between 20 and 0)
-                mario.setCanMoveDown(false);
+            int r = 1;
+            int c = totalMoved/50 + 2;
+            //Broken :( Only works when moving left
+            if (mario.getBottomY() + 20 > ground.get(r).get(c).getTopY()) { //If the bottom of mario after moving is further down (including by 0) than the top of the  ground
+                if (ground.get(r).get(c).isHidden()) { //If there is a hole
+                    gameOver = true;
+                } else {
+                    mario.moveDown(ground.get(r).get(c).getTopY() - mario.getBottomY()); //Move down remaining distance (between 20 and 0)
+                    mario.setCanMoveDown(false);
+                }
             }
-        }
-        //If above ground
-        else if (mario.getBottomY() < ground.get(r).get(c).getTopY()) { //If marios foot is higher than the top of the  ground
-            mario.setCanMoveDown(true);
-        }
-
+            //If above ground
+            else if (mario.getBottomY() < ground.get(r).get(c).getTopY()) { //If marios foot is higher than the top of the  ground
+                mario.setCanMoveDown(true);
+            }
         for (Character character : characterArray) {
             for (GameObject gameObject : pipeArray) { //This is an enhanced for loop - originally suggested by IntelliJ, loops through all items in a list
                 //If below the pipe
