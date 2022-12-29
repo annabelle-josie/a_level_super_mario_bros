@@ -20,6 +20,7 @@ public class Frame extends JFrame {
     Frame.PaintSurface canvas = new Frame.PaintSurface();
     Timer t;
     int totalMoved = 0;
+    int currentGround = 0;
 
     /*Key Listeners*/
     private Frame.KeyLis listener;
@@ -37,22 +38,11 @@ public class Frame extends JFrame {
 
     /*Things*/
     Mario mario;
-
     ArrayList<Character> characterArray = new ArrayList<>();
-
     ArrayList<Villain> villainArray = new ArrayList<>();
-    Villain goombaGary;
-    Villain goombaBab;
-    Villain goombaCarl;
-    int[] goombaPlacement;
-
     ArrayList<ArrayList<GameObject>> ground = new ArrayList<>();
-
     ArrayList<GameObject> pipeArray = new ArrayList<>();
-    GameObject pipe;
-    GameObject pipe2;
-    GameObject pipe3;
-    GameObject[] gameObjects;
+    ArrayList<GameObject> objectArray = new ArrayList<>();
 
     public static void main(String[] args) {
         new Frame();
@@ -75,26 +65,20 @@ public class Frame extends JFrame {
         this.addKeyListener(this.listener);
     }
 
-
     public void resetL1(){
         /*All values cleared*/
         totalMoved = 0;
+        currentGround = 2;
         ground.clear();
         villainArray.clear();
         characterArray.clear();
         pipeArray.clear();
 
-        /*Instantiating each item*/
-        //In future these values could be read from a text file and a new level could be added
-        //Using code similar to:
-        //goombaPlacement ArrayList, brick placement ArrayList, hidden ground placement ArrayList
-        //Where the ints are read from the txt file
-        //I tried it, but it caused random problems that I couldn't track properly
-
+        /*Instantiating the items*/
         mario = new Mario("src/resources/right/SmallStand.png", 100, 450, 50, 50);
         characterArray.add(mario);
 
-        /*Make array of  grounds*/
+        /*Make array of  ground*/
         for (int r = 0; r < 2; r++) {
             ground.add(new ArrayList<>());
             for (int c = 0; c < 80;  c++) {
@@ -102,6 +86,7 @@ public class Frame extends JFrame {
             }
         }
 
+        //Now the only bit that needs changing for each level is the text file!!!
         int current = 0;
         try {
             File inputFile = new File ("src/resources/level1.txt");
@@ -132,19 +117,26 @@ public class Frame extends JFrame {
             }
             myReader.close();
         } catch (FileNotFoundException e){
-            System.out.println("Something went wrong");
+            System.out.println("Level file could not be read");
             e.printStackTrace();
         }
+
+        objectArray.addAll(pipeArray);
+        objectArray.addAll(ground.get(0));
     }
 
-
     public void tick() {
-        if (gameOver) { //Makes mario fall off-screen, then switch the screen to --GAME OVER--
+        //Repaints Canvas
+        if (gameOver || mario.getBottomY()+20 >= 600) { //Makes mario fall off-screen, then switch the screen to --GAME OVER--
             mario.die(); //Mario falls off-screen
             if (mario.getBottomY() >= 600) { //When Mario reaches the bottom
+                try {
+                    Thread.sleep(100); //Wait stops the game looking like it has ended suddenly. Gives the player a chance to see what they did
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 screen = "gameOver"; //Screen switches
             }
-            this.canvas.repaint(); //Repaints Canvas
         } else {
             collisionDetection(); //Check for all collisions and correct them
             /*Villain Animate*/
@@ -204,9 +196,8 @@ public class Frame extends JFrame {
                 }
                 jumping = mario.jump(up, 20);
             }
-            this.canvas.repaint(); //Repaints Canvas
-
         }
+        this.canvas.repaint(); //Repaints Canvas
 
     }
 
@@ -325,52 +316,61 @@ public class Frame extends JFrame {
 
     public void collisionDetection() {
         //Mushrooms must bounce against one another as well as the pipes, maybe this could extend the mario villain collision part?
-            int r = 1;
-            int c = totalMoved/50 + 2;
-            //Broken :( Only works when moving left
-            if (mario.getBottomY() + 20 > ground.get(r).get(c).getTopY()) { //If the bottom of mario after moving is further down (including by 0) than the top of the  ground
-                if (ground.get(r).get(c).isHidden()) { //If there is a hole
-                    gameOver = true;
-                } else {
-                    mario.moveDown(ground.get(r).get(c).getTopY() - mario.getBottomY()); //Move down remaining distance (between 20 and 0)
-                    mario.setCanMoveDown(false);
+
+
+
+        int r = 1; //Only need to look at top row
+        currentGround = totalMoved / 50 + 2;
+        if (mario.getBottomY() + 20 > ground.get(r).get(currentGround).getTopY()) {
+            if(!ground.get(r).get(currentGround).isHidden()) {
+                mario.moveDown(ground.get(r).get(currentGround).getTopY() - mario.getBottomY());
+                mario.canMoveDown = false;
+            }
+            if (rkd) {
+                if ( (ground.get(r).get(totalMoved / 50 + 2).isHidden()) && (ground.get(r).get((totalMoved+50) / 50 + 2).isHidden()) ) {
+                    mario.canMoveDown = true;
+                }
+            } else if (lkd) {
+                if ((ground.get(r).get(totalMoved / 50 + 2).isHidden()) && (ground.get(r).get((totalMoved+50) / 50 + 2).isHidden())) {
+                    mario.canMoveDown = true;
                 }
             }
-            //If above ground
-            else if (mario.getBottomY() < ground.get(r).get(c).getTopY()) { //If marios foot is higher than the top of the  ground
-                mario.setCanMoveDown(true);
-            }
+        } else {
+            mario.canMoveDown = true;
+        }
+
+        /*Pipes*/
         for (Character character : characterArray) {
-            for (GameObject gameObject : pipeArray) { //This is an enhanced for loop - originally suggested by IntelliJ, loops through all items in a list
-                //If below the pipe
-                if (character.getBottomY() > gameObject.getTopY()) {
-                    //If on the right-hand side
-                    if (character.getRightX() >= gameObject.getLeftX() && character.getLeftX() < gameObject.getRightX()) {
-                        if (character == mario) {
-                            character.setCanMoveRight(false);
-                            break;
+            for (GameObject gameObject : pipeArray) { //This is an "enhanced for loop" - originally suggested by IntelliJ, loops through all items in a list
+                    //If below the pipe
+                    if (character.getBottomY() > gameObject.getTopY()) {
+                        //If on the right-hand side
+                        if (character.getRightX() >= gameObject.getLeftX() && character.getLeftX() < gameObject.getRightX()) {
+                            if (character == mario) {
+                                character.setCanMoveRight(false);
+                                break;
+                            } else {
+                                character.bounce();
+                            }
                         } else {
-                            character.bounce();
+                            character.setCanMoveRight(true);
                         }
-                    } else {
-                        character.setCanMoveRight(true);
-                    }
-                    //If on left-hand side
-                    if (character.getLeftX() <= gameObject.getRightX() && character.getRightX() > gameObject.getLeftX()) {
-                        if (character == mario) {
-                            character.setCanMoveLeft(false);
-                            break;
+                        //If on left-hand side
+                        if (character.getLeftX() <= gameObject.getRightX() && character.getRightX() > gameObject.getLeftX()) {
+                            if (character == mario) {
+                                character.setCanMoveLeft(false);
+                                break;
+                            } else {
+                                character.bounce();
+                            }
                         } else {
-                            character.bounce();
+                            character.setCanMoveLeft(true);
                         }
-                    } else {
-                        character.setCanMoveLeft(true);
                     }
-                }
                 //If on top of pipe
                 else if ((character.getBottomY() + 20 > gameObject.getTopY()) && ((character.getRightX() > gameObject.getLeftX() && character.getLeftX() < gameObject.getRightX()))) {
-                    character.moveDown(gameObject.getTopY() - character.getBottomY());
-                    character.setCanMoveDown(false);
+                        character.moveDown(gameObject.getTopY() - character.getBottomY());
+                        character.setCanMoveDown(false);
                 } else { //If above pipe level
                     character.setCanMoveLeft(true);
                     character.setCanMoveRight(true);

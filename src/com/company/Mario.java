@@ -102,10 +102,11 @@ public class Mario extends Character {
     }
 
     public void die(){
-        int d = 5;
-        if ((y+d) <= (600-h)){
+        if ((y+5) <= (600-h)){
             y = y+5;
             theImage = "src/resources/dead.png";
+        } else{
+            y = y+(600-h);
         }
     }
 }

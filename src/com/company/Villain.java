@@ -19,7 +19,7 @@ public class Villain extends Character{
         number++;
         number = number % 20;
         theImage = goombaSet[number/10];
-        x= x + xChange;
+        x = x + xChange;
     }
 
     public void bounce(){
