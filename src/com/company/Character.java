@@ -4,7 +4,7 @@ public class Character extends GameObject {
     protected Boolean canMoveLeft = true;
     protected Boolean canMoveRight = true;
     protected Boolean canMoveUp = true;
-    protected Boolean canMoveDown = true;
+    protected Boolean canMoveDown = false;
 
     public Character(int xIN, int yIN, int wIN, int hIN){
         super(xIN, yIN, wIN, hIN);
@@ -59,5 +59,6 @@ public class Character extends GameObject {
         //Here as a filler to allow Villains to bounce without needing their own collision detection
         //DO NOT DELETE UNLESS REALLY SURE!!
     }
+
 
 }

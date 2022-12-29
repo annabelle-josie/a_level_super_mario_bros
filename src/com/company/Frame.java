@@ -43,6 +43,7 @@ public class Frame extends JFrame {
     ArrayList<ArrayList<GameObject>> ground = new ArrayList<>();
     ArrayList<GameObject> pipeArray = new ArrayList<>();
     ArrayList<GameObject> objectArray = new ArrayList<>();
+    ArrayList<Box> boxArray = new ArrayList<>();
 
     public static void main(String[] args) {
         new Frame();
@@ -73,6 +74,7 @@ public class Frame extends JFrame {
         villainArray.clear();
         characterArray.clear();
         pipeArray.clear();
+        boxArray.clear();
 
         /*Instantiating the items*/
         mario = new Mario("src/resources/right/SmallStand.png", 100, 450, 50, 50);
@@ -112,6 +114,10 @@ public class Frame extends JFrame {
                                 ground.get(i).get(Integer.parseInt(data) + j).setHidden(true);
                             }
                         }
+                    } else if (current == 3){
+                        //Bricks (in sky)
+                        String[] values = data.split(", ");
+                        boxArray.add(new Box(Integer.parseInt(values[0]), Integer.parseInt(values[1]), values[2]));
                     }
                 }
             }
@@ -123,6 +129,8 @@ public class Frame extends JFrame {
 
         objectArray.addAll(pipeArray);
         objectArray.addAll(ground.get(0));
+        objectArray.addAll(ground.get(1));
+        objectArray.addAll(boxArray);
     }
 
     public void tick() {
@@ -142,6 +150,9 @@ public class Frame extends JFrame {
             /*Villain Animate*/
             for (Villain villain : villainArray) {
                 villain.animate();
+                if(villain.canMoveDown) {
+                    villain.moveDown(5);
+                }
             }
             if (lkd) { //Move left
                 if (mario.canMoveLeft && (totalMoved -5 > 0)) {
@@ -153,7 +164,7 @@ public class Frame extends JFrame {
                     for (Villain villain : villainArray) {
                         villain.setLeftX(villain.getLeftX() + 5);
                     }
-                    for (GameObject gameObject : pipeArray) {
+                    /*for (GameObject gameObject : pipeArray) {
                         gameObject.setLeftX(gameObject.getLeftX() + 5);
                     }
                     for (int r = 0; r < 2; r++) {
@@ -162,6 +173,11 @@ public class Frame extends JFrame {
                             ground.get(r).get(c).setLeftX( ground.get(r).get(c).getLeftX() + 5);
                         }
                     }
+                     */
+                    for (GameObject gameObject: objectArray){
+                        gameObject.setLeftX(gameObject.getLeftX() + 5);
+                    }
+
                 }
                 if (mario.canMoveDown && !jumping) { //Falls if needed - Kind of glitchy
                     mario.jump(false, 20); //Falling half of jump
@@ -176,14 +192,8 @@ public class Frame extends JFrame {
                     for (Villain villain : villainArray) {
                         villain.setLeftX(villain.getLeftX() - 5);
                     }
-                    for (GameObject gameObject : pipeArray) {
+                    for (GameObject gameObject: objectArray){
                         gameObject.setLeftX(gameObject.getLeftX() - 5);
-                    }
-                    for (int r = 0; r < 2; r++) {
-                        for (int c = 0; c < 80;  c++) {
-                            // ground[c][r].setLeftX( ground[c][r].getLeftX() - 5);
-                            ground.get(r).get(c).setLeftX( ground.get(r).get(c).getLeftX() - 5);
-                        }
                     }
                 }
                 if (mario.canMoveDown && !jumping) {
@@ -231,6 +241,12 @@ public class Frame extends JFrame {
                             g2.drawImage(groundImg, ground.get(r).get(c).getLeftX(), ground.get(r).get(c).getTopY(), ground.get(r).get(c).getW(), ground.get(r).get(c).getH(), this);
                         }
                     }
+                }
+
+                for(Box box : boxArray){
+                    ImageIcon villainIcon = new ImageIcon(box.image());
+                    Image villainImage = villainIcon.getImage();
+                    g2.drawImage(villainImage, box.getLeftX(), box.getTopY(), box.getW(), box.getH(), this);
                 }
 
                 //Villain Array
@@ -317,27 +333,40 @@ public class Frame extends JFrame {
     public void collisionDetection() {
         //Mushrooms must bounce against one another as well as the pipes, maybe this could extend the mario villain collision part?
 
-
-
         int r = 1; //Only need to look at top row
-        currentGround = totalMoved / 50 + 2;
-        if (mario.getBottomY() + 20 > ground.get(r).get(currentGround).getTopY()) {
-            if(!ground.get(r).get(currentGround).isHidden()) {
-                mario.moveDown(ground.get(r).get(currentGround).getTopY() - mario.getBottomY());
-                mario.canMoveDown = false;
-            }
-            if (rkd) {
-                if ( (ground.get(r).get(totalMoved / 50 + 2).isHidden()) && (ground.get(r).get((totalMoved+50) / 50 + 2).isHidden()) ) {
+
+        //for (Character character : characterArray) {
+            //if (character == mario) {
+                currentGround = totalMoved / 50 + 2;
+
+                if (mario.getBottomY() + 20 > ground.get(r).get(currentGround).getTopY()) {
+                    if (!ground.get(r).get(currentGround).isHidden()) {
+                        mario.moveDown(ground.get(r).get(currentGround).getTopY() - mario.getBottomY());
+                        mario.canMoveDown = false;
+                    }
+                    if (rkd || lkd) {
+                        if ((ground.get(r).get(totalMoved / 50 + 2).isHidden()) && (ground.get(r).get((totalMoved + 50) / 50 + 2).isHidden())) {
+                            mario.canMoveDown = true;
+                        }
+                    }
+                } else {
                     mario.canMoveDown = true;
                 }
-            } else if (lkd) {
-                if ((ground.get(r).get(totalMoved / 50 + 2).isHidden()) && (ground.get(r).get((totalMoved+50) / 50 + 2).isHidden())) {
-                    mario.canMoveDown = true;
+            /*} else{
+                if (character.getBottomY() + 20 > ground.get(r).get(currentGround).getTopY()) {
+                    if (!ground.get(r).get(currentGround).isHidden()) {
+                        character.moveDown(ground.get(r).get(currentGround).getTopY() - character.getBottomY());
+                        character.canMoveDown = false;
+                    }
+                    if ((ground.get(r).get(totalMoved / 50 + 2).isHidden()) && (ground.get(r).get((totalMoved + 50) / 50 + 2).isHidden())) {
+                        character.canMoveDown = true;
+                    }
+                } else {
+                    character.canMoveDown = true;
                 }
             }
-        } else {
-            mario.canMoveDown = true;
         }
+        */
 
         /*Pipes*/
         for (Character character : characterArray) {
