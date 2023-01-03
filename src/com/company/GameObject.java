@@ -58,4 +58,12 @@ public class GameObject {
     public Boolean isHidden(){
         return hidden;
     }
+
+    public void powerup(){
+        //Filler for pipe and brick using same collision detection
+    }
+    public Boolean isNotCollected(){
+        //Filler for box collection
+        return true;
+    }
 }

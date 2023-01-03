@@ -44,6 +44,7 @@ public class Frame extends JFrame {
     ArrayList<GameObject> pipeArray = new ArrayList<>();
     ArrayList<GameObject> objectArray = new ArrayList<>();
     ArrayList<Box> boxArray = new ArrayList<>();
+    ArrayList<GameObject> collisionArray = new ArrayList<>();
 
     public static void main(String[] args) {
         new Frame();
@@ -75,6 +76,8 @@ public class Frame extends JFrame {
         characterArray.clear();
         pipeArray.clear();
         boxArray.clear();
+        objectArray.clear();
+        collisionArray.clear();
 
         /*Instantiating the items*/
         mario = new Mario("src/resources/right/SmallStand.png", 100, 450, 50, 50);
@@ -131,6 +134,8 @@ public class Frame extends JFrame {
         objectArray.addAll(ground.get(0));
         objectArray.addAll(ground.get(1));
         objectArray.addAll(boxArray);
+        collisionArray.addAll(boxArray);
+        collisionArray.addAll(pipeArray);
     }
 
     public void tick() {
@@ -333,12 +338,20 @@ public class Frame extends JFrame {
     public void collisionDetection() {
         //Mushrooms must bounce against one another as well as the pipes, maybe this could extend the mario villain collision part?
 
+        /*Holes - definitely needlessly complicated*/
         int r = 1; //Only need to look at top row
+        //This part now works for mario but I need a way to find the current brick that the Goombas are standing on
+        //At the moment I can't tell where they are as the original idea to use X co-ordinates...
+        //Hold on, it wouldn't work in the way it currently does. But if there is a way of finding out which brick is
+        //At a certain X value at a given time...
+        //Maybe another attribute in the class? e.g. object Number...
+        //OOOOh, that might work!
+        //Coming back to it later though as currently working on the boxes and have spend far too long going down rabbit
+        //holes. uhsgh;rshgusgrithsiphfgs
 
         //for (Character character : characterArray) {
             //if (character == mario) {
                 currentGround = totalMoved / 50 + 2;
-
                 if (mario.getBottomY() + 20 > ground.get(r).get(currentGround).getTopY()) {
                     if (!ground.get(r).get(currentGround).isHidden()) {
                         mario.moveDown(ground.get(r).get(currentGround).getTopY() - mario.getBottomY());
@@ -368,11 +381,28 @@ public class Frame extends JFrame {
         }
         */
 
-        /*Pipes*/
+        /*Pipes & bricks*/
         for (Character character : characterArray) {
-            for (GameObject gameObject : pipeArray) { //This is an "enhanced for loop" - originally suggested by IntelliJ, loops through all items in a list
-                    //If below the pipe
-                    if (character.getBottomY() > gameObject.getTopY()) {
+            for (GameObject gameObject : collisionArray) { //This is an "enhanced for loop" - originally suggested by IntelliJ, loops through all items in a list
+                //character.setCanMoveUp(true);
+                //If below the pipe
+                if (character.getBottomY() > gameObject.getTopY()) {
+                    //If underneath
+                    if (character.getTopY() >= gameObject.getBottomY() && ((character.getRightX() >= gameObject.getLeftX() && character.getLeftX() <= gameObject.getRightX()))){
+                        character.setCanMoveLeft(true);
+                        character.setCanMoveRight(true);
+                        //This is detecting the part underneath only
+                        if(character.getTopY()-20 < gameObject.getBottomY()){
+                            character.moveUp(character.getTopY() - gameObject.getBottomY());
+                            character.setCanMoveUp(false);
+                            //Can currently click two boxes at once, not sure if that is a problem?
+                            if(gameObject.isNotCollected()) {
+                                gameObject.powerup();
+                            }
+                        } else{
+                            character.setCanMoveUp(true);
+                        }
+                    } else {
                         //If on the right-hand side
                         if (character.getRightX() >= gameObject.getLeftX() && character.getLeftX() < gameObject.getRightX()) {
                             if (character == mario) {
@@ -396,10 +426,11 @@ public class Frame extends JFrame {
                             character.setCanMoveLeft(true);
                         }
                     }
+                }
                 //If on top of pipe
                 else if ((character.getBottomY() + 20 > gameObject.getTopY()) && ((character.getRightX() > gameObject.getLeftX() && character.getLeftX() < gameObject.getRightX()))) {
-                        character.moveDown(gameObject.getTopY() - character.getBottomY());
-                        character.setCanMoveDown(false);
+                    character.moveDown(gameObject.getTopY() - character.getBottomY());
+                    character.setCanMoveDown(false);
                 } else { //If above pipe level
                     character.setCanMoveLeft(true);
                     character.setCanMoveRight(true);
