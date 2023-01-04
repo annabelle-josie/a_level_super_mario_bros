@@ -21,6 +21,7 @@ public class Frame extends JFrame {
     Timer t;
     int totalMoved = 0;
     int currentGround = 0;
+    boolean boxAnimating =false;
 
     /*Key Listeners*/
     private Frame.KeyLis listener;
@@ -45,6 +46,7 @@ public class Frame extends JFrame {
     ArrayList<GameObject> objectArray = new ArrayList<>();
     ArrayList<Box> boxArray = new ArrayList<>();
     ArrayList<GameObject> collisionArray = new ArrayList<>();
+    ArrayList<GameObject> extraItems = new ArrayList<>(); //If paint is condensed into using objectArray then no necessary
 
     public static void main(String[] args) {
         new Frame();
@@ -115,7 +117,7 @@ public class Frame extends JFrame {
                         for (int j = 0; j < 2 ; j++) {
                             for (int i = 0; i < 2; i++) {
                                 ground.get(i).get(Integer.parseInt(data) + j).setHidden(true);
-                            }
+                            }   
                         }
                     } else if (current == 3){
                         //Bricks (in sky)
@@ -152,6 +154,8 @@ public class Frame extends JFrame {
             }
         } else {
             collisionDetection(); //Check for all collisions and correct them
+            /*Animations*/
+
             /*Villain Animate*/
             for (Villain villain : villainArray) {
                 villain.animate();
@@ -249,10 +253,14 @@ public class Frame extends JFrame {
                 }
 
                 for(Box box : boxArray){
-                    ImageIcon villainIcon = new ImageIcon(box.image());
-                    Image villainImage = villainIcon.getImage();
-                    g2.drawImage(villainImage, box.getLeftX(), box.getTopY(), box.getW(), box.getH(), this);
+                    if(!box.isHidden()) {
+                        ImageIcon villainIcon = new ImageIcon(box.image());
+                        Image villainImage = villainIcon.getImage();
+                        g2.drawImage(villainImage, box.getLeftX(), box.getTopY(), box.getW(), box.getH(), this);
+                    }
                 }
+
+
 
                 //Villain Array
                 for (Villain villain : villainArray) {
@@ -261,6 +269,12 @@ public class Frame extends JFrame {
                         Image villainImage = villainIcon.getImage();
                         g2.drawImage(villainImage, villain.getLeftX(), villain.getTopY(), villain.getW(), villain.getH(), this);
                     }
+                }
+
+                for(GameObject gameObject : extraItems){
+                    ImageIcon villainIcon = new ImageIcon(gameObject.getImage());
+                    Image villainImage = villainIcon.getImage();
+                    g2.drawImage(villainImage, gameObject.getLeftX(), gameObject.getTopY(), gameObject.getW(), gameObject.getH(), this);
                 }
 
                 //Mario - Must always be added last so that when he dies he falls in front of everything
@@ -392,13 +406,15 @@ public class Frame extends JFrame {
                         character.setCanMoveLeft(true);
                         character.setCanMoveRight(true);
                         //This is detecting the part underneath only
-                        if(character.getTopY()-20 < gameObject.getBottomY()){
+                        if(character.getTopY()-20 < gameObject.getBottomY() || boxAnimating){
                             character.moveUp(character.getTopY() - gameObject.getBottomY());
                             character.setCanMoveUp(false);
                             //Can currently click two boxes at once, not sure if that is a problem?
+                            //I'm leaving it until I decide it is a problem
                             if(gameObject.isNotCollected()) {
-                                gameObject.powerup();
-                            }
+                                boxAnimating = (gameObject.powerup());
+                            } //Detect if containing something
+                            //
                         } else{
                             character.setCanMoveUp(true);
                         }
