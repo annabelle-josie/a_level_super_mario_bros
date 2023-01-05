@@ -109,6 +109,11 @@ public class Mario extends Character {
             y = y+(600-h);
         }
     }
+
+    public void spot(){
+        direction = "right";
+        animate();
+    }
 }
 
 

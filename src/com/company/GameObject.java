@@ -7,6 +7,7 @@ public class GameObject {
     protected int h;
     protected boolean hidden;
     protected String image; //Just added, could cause problems or make easier who knows
+    protected int totalJumped;
 
     public GameObject(int xIN, int yIN, int wIN, int hIN){
         this.x = xIN;
@@ -14,6 +15,7 @@ public class GameObject {
         this.w = wIN;
         this.h = hIN;
         hidden = false;
+        totalJumped = 0;
     }
 
     public void setTopY(int y) {
@@ -68,8 +70,30 @@ public class GameObject {
         //Filler for box collection
         return true;
     }
+    public String contains(){
+        return "none";
+    }
 
+    public void setImage(String imageEntered){image = imageEntered;}
     public String getImage(){
         return image;
     }
+
+    public Boolean jump(){
+        //Returns whether complete
+        if(totalJumped < 20){
+            y = y-5;
+            totalJumped++;
+            return false;
+        } else if (totalJumped == 41){
+                hidden = true;
+                return true;
+        }else{
+            y = y+5;
+            //y = y + (20-totalJumped);
+            totalJumped++;
+            return false;
+        }
+    }
 }
+

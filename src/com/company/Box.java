@@ -4,7 +4,6 @@ public class Box extends GameObject {
     protected String contain;
     protected boolean collected;
     protected int flicker;
-    protected int totalJumped;
     protected boolean jumping;
 
     public Box(int xIN, int yIN, String inside) {
@@ -34,7 +33,7 @@ public class Box extends GameObject {
 
     public Boolean powerup(){
         if(contain.equals("coin")){
-            System.out.println("src/resources/others/coin.png");
+            contain = "empty";
         }
         if(totalJumped < 10){
             y = y-2;
@@ -58,5 +57,9 @@ public class Box extends GameObject {
 
     public Boolean isNotCollected(){
         return (!collected);
+    }
+
+    public String contains(){
+        return contain;
     }
 }

@@ -19,9 +19,12 @@ import java.util.Scanner; // Import the Scanner class to read text files
 public class Frame extends JFrame {
     Frame.PaintSurface canvas = new Frame.PaintSurface();
     Timer t;
+    int score = 0;
     int totalMoved = 0;
     int currentGround = 0;
-    boolean boxAnimating =false;
+    boolean boxAnimating = false;
+    int transparentPlacement = 310;
+    int level = 1;
 
     /*Key Listeners*/
     private Frame.KeyLis listener;
@@ -31,13 +34,15 @@ public class Frame extends JFrame {
 
     /*To change the screen*/
     Boolean gameOver = false;
-    String screen = "level1";
+    String screen = "startScreen";
 
     /*Jumping Variables*/
     Boolean jumping = false;
     Boolean up = false; //Is moving up
 
     /*Things*/
+    Mario mannequinMario;
+    Villain mannequinGoomba;
     Mario mario;
     ArrayList<Character> characterArray = new ArrayList<>();
     ArrayList<Villain> villainArray = new ArrayList<>();
@@ -56,7 +61,7 @@ public class Frame extends JFrame {
         this.setSize(800, 627); //627 to make up for bar at top
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE); //Kills code on close
         this.setTitle("Mario");
-        resetL1();
+        resetLevel();
         this.add(this.canvas); //Add the painted area
         this.setVisible(true);
 
@@ -69,7 +74,7 @@ public class Frame extends JFrame {
         this.addKeyListener(this.listener);
     }
 
-    public void resetL1(){
+    public void resetLevel(){
         /*All values cleared*/
         totalMoved = 0;
         currentGround = 2;
@@ -80,6 +85,7 @@ public class Frame extends JFrame {
         boxArray.clear();
         objectArray.clear();
         collisionArray.clear();
+        extraItems.clear();
 
         /*Instantiating the items*/
         mario = new Mario("src/resources/right/SmallStand.png", 100, 450, 50, 50);
@@ -92,11 +98,16 @@ public class Frame extends JFrame {
                 ground.get(r).add( c , new GameObject( c * 50, 550 - (r * 50), 50, 50));
             }
         }
-
+        String file = "src/resources/level1.txt";
         //Now the only bit that needs changing for each level is the text file!!!
         int current = 0;
         try {
-            File inputFile = new File ("src/resources/level1.txt");
+            if(level == 1) {
+                file = "src/resources/level1.txt";
+            } else if(level == 2){
+                file = "src/resources/level2.txt";
+            }
+            File inputFile = new File(file);
             Scanner myReader = new Scanner(inputFile);
             while (myReader.hasNextLine()){
                 String data = myReader.nextLine();
@@ -120,7 +131,7 @@ public class Frame extends JFrame {
                             }   
                         }
                     } else if (current == 3){
-                        //Bricks (in sky)
+                        //Boxes (in sky)
                         String[] values = data.split(", ");
                         boxArray.add(new Box(Integer.parseInt(values[0]), Integer.parseInt(values[1]), values[2]));
                     }
@@ -141,6 +152,11 @@ public class Frame extends JFrame {
     }
 
     public void tick() {
+        if (screen.equals("startScreen")){
+            mannequinGoomba.setChange(0);
+            mannequinGoomba.spot();
+            mannequinMario.spot();
+        }
         //Repaints Canvas
         if (gameOver || mario.getBottomY()+20 >= 600) { //Makes mario fall off-screen, then switch the screen to --GAME OVER--
             mario.die(); //Mario falls off-screen
@@ -220,84 +236,118 @@ public class Frame extends JFrame {
 
     }
 
+    public void setUpStart(){
+        if(mannequinMario == null) {
+            mannequinMario = new Mario("src/resources/right/SmallStand.png", 450, 400, 100, 100);
+            mannequinGoomba = new Villain(250, 400, 100, 100);
+        }
+    }
+
     class PaintSurface extends JComponent {
         PaintSurface() {
         }
 
         public void paint(Graphics g) {
-            if (screen.equals("level1")) {
-                Graphics2D g2 = (Graphics2D) g;
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            Graphics2D g2 = (Graphics2D) g;
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            switch (screen) {
+                case "startScreen" -> {
+                    setUpStart();
+                    //Start Screen
+                    ImageIcon ii = new ImageIcon("src/resources/others/startScreen.png");
+                    Image gameOverScreen = ii.getImage();
+                    g2.drawImage(gameOverScreen, 0, 0, 800, 600, this);
 
-                //Background
-                ImageIcon skyIcon = new ImageIcon("src/resources/others/sky.jpg");
-                Image sky = skyIcon.getImage();
-                g2.drawImage(sky, 0, 0, 800, 600, this);
+                    //Goomba
+                    ImageIcon villainIcon = new ImageIcon(mannequinGoomba.image());
+                    Image villainImage = villainIcon.getImage();
+                    g2.drawImage(villainImage, mannequinGoomba.getLeftX(), mannequinGoomba.getTopY(), mannequinGoomba.getW(), mannequinGoomba.getH(), this);
 
-                //Pipe
-                for (GameObject gameObject : pipeArray) {
-                    ImageIcon pipeIcon = new ImageIcon("src/resources/others/pipe.png");
-                    Image pipeImg = pipeIcon.getImage();
-                    g2.drawImage(pipeImg, gameObject.getLeftX(), gameObject.getTopY(), gameObject.getW(), gameObject.getH(), this);
+                    //Mario
+                    ImageIcon i2 = new ImageIcon(mannequinMario.image());
+                    Image marioIcon = i2.getImage();
+                    g2.drawImage(marioIcon, mannequinMario.getLeftX(), mannequinMario.getTopY(), mannequinMario.getW(), mannequinMario.getH(), this);
+
                 }
+                case "levelSelect"-> {
+                    //Start Screen
+                    ImageIcon ii = new ImageIcon("src/resources/others/levelSelect.png");
+                    Image gameOverScreen = ii.getImage();
+                    g2.drawImage(gameOverScreen, 0, 0, 800, 600, this);
 
-                //Array of blocks for ground
-                ImageIcon groundIcon = new ImageIcon("src/resources/others/ground.png");
-                Image groundImg = groundIcon.getImage();
-                for (int r = 0; r < 2; r++) {
-                    for (int c = 0; c < 80;  c++) {
-                        if(!ground.get(r).get(c).isHidden()) {
-                            g2.drawImage(groundImg, ground.get(r).get(c).getLeftX(), ground.get(r).get(c).getTopY(), ground.get(r).get(c).getW(), ground.get(r).get(c).getH(), this);
+                    //Highlight
+                    Shape highlight = new Float(215, transparentPlacement, 400, 25);
+                    g2.setPaint(Color.white);
+                    AlphaComposite alcom = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f);
+                    g2.setComposite(alcom);
+                    g2.fill(highlight);
+                }
+                case "level" -> {
+                    //Background
+                    ImageIcon skyIcon = new ImageIcon("src/resources/others/sky.jpg");
+                    Image sky = skyIcon.getImage();
+                    g2.drawImage(sky, 0, 0, 800, 600, this);
+
+                    //Pipe
+                    for (GameObject gameObject : pipeArray) {
+                        ImageIcon pipeIcon = new ImageIcon("src/resources/others/pipe.png");
+                        Image pipeImg = pipeIcon.getImage();
+                        g2.drawImage(pipeImg, gameObject.getLeftX(), gameObject.getTopY(), gameObject.getW(), gameObject.getH(), this);
+                    }
+
+                    //Array of blocks for ground
+                    ImageIcon groundIcon = new ImageIcon("src/resources/others/ground.png");
+                    Image groundImg = groundIcon.getImage();
+                    for (int r = 0; r < 2; r++) {
+                        for (int c = 0; c < 80; c++) {
+                            if (!ground.get(r).get(c).isHidden()) {
+                                g2.drawImage(groundImg, ground.get(r).get(c).getLeftX(), ground.get(r).get(c).getTopY(), ground.get(r).get(c).getW(), ground.get(r).get(c).getH(), this);
+                            }
                         }
                     }
-                }
 
-                for(Box box : boxArray){
-                    if(!box.isHidden()) {
-                        ImageIcon villainIcon = new ImageIcon(box.image());
-                        Image villainImage = villainIcon.getImage();
-                        g2.drawImage(villainImage, box.getLeftX(), box.getTopY(), box.getW(), box.getH(), this);
+                    for (Box box : boxArray) {
+                        if (!box.isHidden()) {
+                            ImageIcon villainIcon = new ImageIcon(box.image());
+                            Image villainImage = villainIcon.getImage();
+                            g2.drawImage(villainImage, box.getLeftX(), box.getTopY(), box.getW(), box.getH(), this);
+                        }
                     }
-                }
 
-
-
-                //Villain Array
-                for (Villain villain : villainArray) {
-                    if (!(villain.isHidden())) {
-                        ImageIcon villainIcon = new ImageIcon(villain.image());
-                        Image villainImage = villainIcon.getImage();
-                        g2.drawImage(villainImage, villain.getLeftX(), villain.getTopY(), villain.getW(), villain.getH(), this);
+                    //Villain Array
+                    for (Villain villain : villainArray) {
+                        if (!(villain.isHidden())) {
+                            ImageIcon villainIcon = new ImageIcon(villain.image());
+                            Image villainImage = villainIcon.getImage();
+                            g2.drawImage(villainImage, villain.getLeftX(), villain.getTopY(), villain.getW(), villain.getH(), this);
+                        }
                     }
+
+                    for (GameObject gameObject : extraItems) {
+                        ImageIcon theIcon = new ImageIcon(gameObject.getImage());
+                        Image theImage = theIcon.getImage();
+                        g2.drawImage(theImage, gameObject.getLeftX(), gameObject.getTopY(), gameObject.getW(), gameObject.getH(), this);
+                    }
+
+                    //Mario - Must always be added last so that when he dies he falls in front of everything
+                    ImageIcon i2 = new ImageIcon(mario.image());
+                    Image marioIcon = i2.getImage();
+                    g2.drawImage(marioIcon, mario.getLeftX(), mario.getTopY(), mario.getW(), mario.getH(), this);
+
+
                 }
+                case "gameOver" -> {
+                    //White background
+                    Shape background = new Float(000.0F, 0.0F, 800.0F, 600.0F);
+                    g2.setPaint(Color.white);
+                    g2.fill(background);
 
-                for(GameObject gameObject : extraItems){
-                    ImageIcon villainIcon = new ImageIcon(gameObject.getImage());
-                    Image villainImage = villainIcon.getImage();
-                    g2.drawImage(villainImage, gameObject.getLeftX(), gameObject.getTopY(), gameObject.getW(), gameObject.getH(), this);
+                    //Black Game Over Text
+                    ImageIcon ii = new ImageIcon("src/resources/others/gameOverScreen.png");
+                    Image gameOverScreen = ii.getImage();
+                    g2.drawImage(gameOverScreen, 100, -50, 600, 600, this);
+                    
                 }
-
-                //Mario - Must always be added last so that when he dies he falls in front of everything
-                ImageIcon i2 = new ImageIcon(mario.image());
-                Image marioIcon = i2.getImage();
-                g2.drawImage(marioIcon, mario.getLeftX(), mario.getTopY(), mario.getW(), mario.getH(), this);
-
-            } else if (screen.equals("gameOver")) {
-                Graphics2D g2 = (Graphics2D) g;
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-                //White background
-                Shape background = new Float(000.0F, 0.0F, 800.0F, 600.0F);
-                g2.setPaint(Color.white);
-                g2.fill(background);
-
-                //Black Game Over Text
-                ImageIcon ii = new ImageIcon("src/resources/gameOverScreen.png");
-                Image gameOverScreen;
-                gameOverScreen = ii.getImage();
-                g2.drawImage(gameOverScreen, 300, 200, 200, 200, this);
-
-                JLabel label1 = new JLabel("Test");
             }
         }
     }
@@ -308,6 +358,28 @@ public class Frame extends JFrame {
 
         public void keyPressed(KeyEvent e) {
             switch (e.getKeyCode()) {
+                case 32: //Space Key
+                    screen = "levelSelect";
+                    break;
+                case 48: //0 key
+                    if(screen.equals("levelSelect")){
+                        transparentPlacement = 310;
+                    }
+                    break;
+                case 49: //1 key
+                    if(screen.equals("levelSelect")){
+                        transparentPlacement = 335;
+                    }
+                    break;
+                case 83: //S key
+                    if(transparentPlacement == 310) {
+                        level = 1; //special for tutorial?
+                    } else{
+                        level = 2;
+                    }
+                    screen = "level";
+                    resetLevel();
+                    break;
                 case 37: //Left Arrow Key
                     Frame.lkd = true;
                     break;
@@ -329,8 +401,8 @@ public class Frame extends JFrame {
                     break;
                 case 82: //R Key
                     gameOver = false;
-                    resetL1();
-                    screen = "level1";
+                    resetLevel();
+                    screen = "level";
                     break;
             }
         }
@@ -412,9 +484,18 @@ public class Frame extends JFrame {
                             //Can currently click two boxes at once, not sure if that is a problem?
                             //I'm leaving it until I decide it is a problem
                             if(gameObject.isNotCollected()) {
+                                if (gameObject.contains().equals("coin")){
+                                    extraItems.add(new GameObject(gameObject.getLeftX()+10, gameObject.getTopY()-40, 30, 40));
+                                    extraItems.get(0).setImage("src/resources/others/coin.png");
+                                }
                                 boxAnimating = (gameObject.powerup());
-                            } //Detect if containing something
-                            //
+                                if(!extraItems.isEmpty()) {
+                                    if (extraItems.get(0).jump()) {
+                                        score = score + 200;
+                                        extraItems.remove(0);
+                                    }
+                                }
+                            }
                         } else{
                             character.setCanMoveUp(true);
                         }

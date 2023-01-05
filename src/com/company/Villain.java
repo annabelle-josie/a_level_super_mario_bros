@@ -26,4 +26,12 @@ public class Villain extends Character{
         xChange = xChange * -1;
     }
 
+    public void setChange(int value){
+        xChange = value;
+    }
+
+    public void spot(){
+        animate();
+    }
 }
+
