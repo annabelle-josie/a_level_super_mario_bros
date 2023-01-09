@@ -7,7 +7,15 @@ Note: The height must be below the top of the bricks (400, I think... Will check
 A new line is then left and next inputs are for holes
 The bricks are instantiated automatically, it is only the gaps between then (hidden bricks) that need to be listed here.
 Each number will spawn a gap of 2 bricks e.g. 5 would make bricks 5 and 6 hidden
+To find in from desired y position, divide by 50
 
 A new line is then left and the next inputs are for boxes
 Each box takes 3 inputs, x, y and contents.
 Contents should be "none", "coin", "powerup". If it contains something else, it will show a ? box but no powerup will be applied
+The standard y values for boxes are 300 and 150
+
+Order:
+- Goomba
+- Pipe
+- Hole
+- Box

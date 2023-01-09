@@ -16,7 +16,9 @@ public class Box extends GameObject {
     }
 
     public String image(){
-        if (contain.equals("none") && !hidden) {
+        if (contain.equals("block")){
+            return ("src/resources/others/block.png");
+        } else if (contain.equals("none") && !hidden) {
             return ("src/resources/others/brick.png");
         } else if(!contain.equals("none") && collected){
             return ("src/resources/others/box.png");
@@ -35,24 +37,27 @@ public class Box extends GameObject {
         if(contain.equals("coin")){
             contain = "empty";
         }
-        if(totalJumped < 10){
-            y = y-2;
-            totalJumped++;
-            return true;
-        } else if (totalJumped == 21){
-            jumping = false;
-            collected = true;
-            if(contain.equals("none")){
-                hidden = true;
+        if(!contain.equals("block")) {
+            if (totalJumped < 10) {
+                y = y - 2;
+                totalJumped++;
+                return true;
+            } else if (totalJumped == 21) {
+                jumping = false;
+                collected = true;
+                if (contain.equals("none")) {
+                    hidden = true;
+                }
+                return false;
+            } else {
+                y = y + 2;
+                //y = y + (20-totalJumped);
+                totalJumped++;
+                return true;
             }
+        } else{
             return false;
-        }else{
-            y = y+2;
-            //y = y + (20-totalJumped);
-            totalJumped++;
-            return true;
         }
-
     }
 
     public Boolean isNotCollected(){

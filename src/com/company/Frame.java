@@ -20,11 +20,12 @@ public class Frame extends JFrame {
     Frame.PaintSurface canvas = new Frame.PaintSurface();
     Timer t;
     int score = 0;
+    int level = 1;
+    int coins = 0;
     int totalMoved = 0;
     int currentGround = 0;
     boolean boxAnimating = false;
     int transparentPlacement = 310;
-    int level = 1;
 
     /*Key Listeners*/
     private Frame.KeyLis listener;
@@ -86,6 +87,8 @@ public class Frame extends JFrame {
         objectArray.clear();
         collisionArray.clear();
         extraItems.clear();
+        score = 0;
+        coins = 0;
 
         /*Instantiating the items*/
         mario = new Mario("src/resources/right/SmallStand.png", 100, 450, 50, 50);
@@ -94,11 +97,11 @@ public class Frame extends JFrame {
         /*Make array of  ground*/
         for (int r = 0; r < 2; r++) {
             ground.add(new ArrayList<>());
-            for (int c = 0; c < 80;  c++) {
+            for (int c = 0; c < 160;  c++) {
                 ground.get(r).add( c , new GameObject( c * 50, 550 - (r * 50), 50, 50));
             }
         }
-        String file = "src/resources/level1.txt";
+        String file = ("src/resources/level"+level+".txt");
         //Now the only bit that needs changing for each level is the text file!!!
         int current = 0;
         try {
@@ -171,7 +174,12 @@ public class Frame extends JFrame {
         } else {
             collisionDetection(); //Check for all collisions and correct them
             /*Animations*/
-
+            if (!extraItems.isEmpty()) {
+                if (extraItems.get(0).jump()) {
+                    score = score + 1;
+                    extraItems.remove(0);
+                }
+            }
             /*Villain Animate*/
             for (Villain villain : villainArray) {
                 villain.animate();
@@ -193,7 +201,7 @@ public class Frame extends JFrame {
                         gameObject.setLeftX(gameObject.getLeftX() + 5);
                     }
                     for (int r = 0; r < 2; r++) {
-                        for (int c = 0; c < 80;  c++) {
+                        for (int c = 0; c < 160;  c++) {
                             // ground[c][r].setLeftX( ground[c][r].getLeftX() + 5);
                             ground.get(r).get(c).setLeftX( ground.get(r).get(c).getLeftX() + 5);
                         }
@@ -202,13 +210,16 @@ public class Frame extends JFrame {
                     for (GameObject gameObject: objectArray){
                         gameObject.setLeftX(gameObject.getLeftX() + 5);
                     }
-
                 }
                 if (mario.canMoveDown && !jumping) { //Falls if needed - Kind of glitchy
                     mario.jump(false, 20); //Falling half of jump
                 }
             } else if (rkd) { //Move right
-                if (mario.canMoveRight && (totalMoved +5 < 3900)){ //This value must be changed if length of level changes
+                if(totalMoved +5 > 7750){
+                    mario.moveRight(5);
+                    totalMoved = totalMoved + 5;
+                    System.out.println("You've won");
+                } else if (mario.canMoveRight){ //This value must be changed if length of level changes
                     mario.moveRight(5);
                     totalMoved = totalMoved + 5;
                     //Turn this into an array of arrays and go through all changing x
@@ -284,9 +295,24 @@ public class Frame extends JFrame {
                 }
                 case "level" -> {
                     //Background
-                    ImageIcon skyIcon = new ImageIcon("src/resources/others/sky.jpg");
+                    ImageIcon skyIcon = new ImageIcon("src/resources/others/levelBackground.png");
                     Image sky = skyIcon.getImage();
                     g2.drawImage(sky, 0, 0, 800, 600, this);
+
+                    //Coin Count
+                    ImageIcon coinIcon = new ImageIcon("src/resources/others/numbers/" + coins + ".png");
+                    Image coinImg = coinIcon.getImage();
+                    g2.drawImage(coinImg, 295, 30, 50, 50, this);
+
+                    //Score
+                    ImageIcon scoreIcon = new ImageIcon("src/resources/others/numbers/" + score +"00.png");
+                    Image scoreImg = scoreIcon.getImage();
+                    g2.drawImage(scoreImg, 483, 30, 75, 50, this);
+
+                    //Level
+                    ImageIcon levelIcon = new ImageIcon("src/resources/others/numbers/1.png");
+                    Image levelImg = levelIcon.getImage();
+                    g2.drawImage(levelImg, 695, 30, 50, 50, this);
 
                     //Pipe
                     for (GameObject gameObject : pipeArray) {
@@ -299,7 +325,7 @@ public class Frame extends JFrame {
                     ImageIcon groundIcon = new ImageIcon("src/resources/others/ground.png");
                     Image groundImg = groundIcon.getImage();
                     for (int r = 0; r < 2; r++) {
-                        for (int c = 0; c < 80; c++) {
+                        for (int c = 0; c < 160; c++) {
                             if (!ground.get(r).get(c).isHidden()) {
                                 g2.drawImage(groundImg, ground.get(r).get(c).getLeftX(), ground.get(r).get(c).getTopY(), ground.get(r).get(c).getW(), ground.get(r).get(c).getH(), this);
                             }
@@ -346,7 +372,7 @@ public class Frame extends JFrame {
                     ImageIcon ii = new ImageIcon("src/resources/others/gameOverScreen.png");
                     Image gameOverScreen = ii.getImage();
                     g2.drawImage(gameOverScreen, 100, -50, 600, 600, this);
-                    
+
                 }
             }
         }
@@ -359,7 +385,17 @@ public class Frame extends JFrame {
         public void keyPressed(KeyEvent e) {
             switch (e.getKeyCode()) {
                 case 32: //Space Key
-                    screen = "levelSelect";
+                    if (screen.equals("startScreen")){
+                        screen = "levelSelect";
+                    } else if (screen.equals("levelSelect")){
+                        if(transparentPlacement == 310) {
+                            level = 1; //special for tutorial?
+                        } else{
+                            level = 2;
+                        }
+                        screen = "level";
+                        resetLevel();
+                    }
                     break;
                 case 48: //0 key
                     if(screen.equals("levelSelect")){
@@ -398,6 +434,9 @@ public class Frame extends JFrame {
                     break;
                 case 68: //D Key
                     gameOver = true;
+                    break;
+                case 77: //M Key
+                    screen = "levelSelect";
                     break;
                 case 82: //R Key
                     gameOver = false;
@@ -470,67 +509,64 @@ public class Frame extends JFrame {
         /*Pipes & bricks*/
         for (Character character : characterArray) {
             for (GameObject gameObject : collisionArray) { //This is an "enhanced for loop" - originally suggested by IntelliJ, loops through all items in a list
-                //character.setCanMoveUp(true);
-                //If below the pipe
-                if (character.getBottomY() > gameObject.getTopY()) {
-                    //If underneath
-                    if (character.getTopY() >= gameObject.getBottomY() && ((character.getRightX() >= gameObject.getLeftX() && character.getLeftX() <= gameObject.getRightX()))){
-                        character.setCanMoveLeft(true);
-                        character.setCanMoveRight(true);
-                        //This is detecting the part underneath only
-                        if(character.getTopY()-20 < gameObject.getBottomY() || boxAnimating){
-                            character.moveUp(character.getTopY() - gameObject.getBottomY());
-                            character.setCanMoveUp(false);
-                            //Can currently click two boxes at once, not sure if that is a problem?
-                            //I'm leaving it until I decide it is a problem
-                            if(gameObject.isNotCollected()) {
-                                if (gameObject.contains().equals("coin")){
-                                    extraItems.add(new GameObject(gameObject.getLeftX()+10, gameObject.getTopY()-40, 30, 40));
-                                    extraItems.get(0).setImage("src/resources/others/coin.png");
-                                }
-                                boxAnimating = (gameObject.powerup());
-                                if(!extraItems.isEmpty()) {
-                                    if (extraItems.get(0).jump()) {
-                                        score = score + 200;
-                                        extraItems.remove(0);
-                                    }
-                                }
-                            }
-                        } else{
-                            character.setCanMoveUp(true);
-                        }
-                    } else {
-                        //If on the right-hand side
-                        if (character.getRightX() >= gameObject.getLeftX() && character.getLeftX() < gameObject.getRightX()) {
-                            if (character == mario) {
-                                character.setCanMoveRight(false);
-                                break;
-                            } else {
-                                character.bounce();
-                            }
-                        } else {
-                            character.setCanMoveRight(true);
-                        }
-                        //If on left-hand side
-                        if (character.getLeftX() <= gameObject.getRightX() && character.getRightX() > gameObject.getLeftX()) {
-                            if (character == mario) {
-                                character.setCanMoveLeft(false);
-                                break;
-                            } else {
-                                character.bounce();
-                            }
-                        } else {
+                if(!gameObject.isHidden()) {
+                    //character.setCanMoveUp(true);
+                    //If below the pipe
+                    if (character.getBottomY() > gameObject.getTopY()) {
+                        //If underneath
+                        if (character.getTopY() >= gameObject.getBottomY() && ((character.getRightX() >= gameObject.getLeftX() && character.getLeftX() <= gameObject.getRightX()))) {
                             character.setCanMoveLeft(true);
+                            character.setCanMoveRight(true);
+                            //This is detecting the part underneath only
+                            if (character.getTopY() - 20 < gameObject.getBottomY() || boxAnimating) {
+                                character.moveUp(character.getTopY() - gameObject.getBottomY());
+                                character.setCanMoveUp(false);
+                                //Can currently click two boxes at once, not sure if that is a problem?
+                                //I'm leaving it until I decide it is a problem
+                                if (gameObject.isNotCollected()) {
+                                    if (gameObject.contains().equals("coin")) {
+                                        extraItems.add(new GameObject(gameObject.getLeftX() + 10, gameObject.getTopY() - 40, 30, 40));
+                                        extraItems.get(0).setImage("src/resources/others/coin.png");
+                                        coins++;
+                                    }
+                                    boxAnimating = (gameObject.powerup());
+                                }
+                            } else {
+                                character.setCanMoveUp(true);
+                            }
+                        } else {
+                            //If on the right-hand side
+                            if (character.getRightX() >= gameObject.getLeftX() && character.getLeftX() < gameObject.getRightX()) {
+                                if (character == mario) {
+                                    character.setCanMoveRight(false);
+                                    break;
+                                } else {
+                                    character.bounce();
+                                }
+                            } else {
+                                character.setCanMoveRight(true);
+                            }
+                            //If on left-hand side
+                            if (character.getLeftX() <= gameObject.getRightX() && character.getRightX() > gameObject.getLeftX()) {
+                                if (character == mario) {
+                                    character.setCanMoveLeft(false);
+                                    break;
+                                } else {
+                                    character.bounce();
+                                }
+                            } else {
+                                character.setCanMoveLeft(true);
+                            }
                         }
                     }
-                }
-                //If on top of pipe
-                else if ((character.getBottomY() + 20 > gameObject.getTopY()) && ((character.getRightX() > gameObject.getLeftX() && character.getLeftX() < gameObject.getRightX()))) {
-                    character.moveDown(gameObject.getTopY() - character.getBottomY());
-                    character.setCanMoveDown(false);
-                } else { //If above pipe level
-                    character.setCanMoveLeft(true);
-                    character.setCanMoveRight(true);
+                    //If on top of pipe
+                    else if ((character.getBottomY() + 20 > gameObject.getTopY()) && ((character.getRightX() > gameObject.getLeftX() && character.getLeftX() < gameObject.getRightX()))) {
+                        character.moveDown(gameObject.getTopY() - character.getBottomY());
+                        character.setCanMoveDown(false);
+                    } else { //If above pipe level
+                        character.setCanMoveLeft(true);
+                        character.setCanMoveRight(true);
+                    }
                 }
             }
         }
