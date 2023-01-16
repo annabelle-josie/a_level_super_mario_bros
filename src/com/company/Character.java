@@ -58,7 +58,7 @@ public class Character extends GameObject {
     public void bounce(){
         //Here as a filler to allow Villains to bounce without needing their own collision detection
         //DO NOT DELETE UNLESS REALLY SURE!!
-    }
+    }//Filler
 
 
 }

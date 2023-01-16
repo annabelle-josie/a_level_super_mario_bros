@@ -18,6 +18,14 @@ public class GameObject {
         totalJumped = 0;
     }
 
+    public GameObject(int xIN, int yIN, int wIN, int hIN, String image){
+        this.x = xIN;
+        this.y = yIN;
+        this.w = wIN;
+        this.h = hIN;
+        this.image = image;
+    }
+
     public void setTopY(int y) {
         this.y = y;
     }

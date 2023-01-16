@@ -14,6 +14,8 @@ Each box takes 3 inputs, x, y and contents.
 Contents should be "none", "coin", "powerup". If it contains something else, it will show a ? box but no powerup will be applied
 The standard y values for boxes are 300 and 150
 
+Last is the tutorial part
+
 Order:
 - Goomba
 - Pipe
