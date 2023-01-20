@@ -14,6 +14,11 @@ Each box takes 3 inputs, x, y and contents.
 Contents should be "none", "coin", "powerup". If it contains something else, it will show a ? box but no powerup will be applied
 The standard y values for boxes are 300 and 150
 
+A new line is then left and then the x and y co-ordinates of the castle are given
+
+A new line is then left and then the x, y, w, and h co-ordinates of the image are given as well as the location of the image in
+the format src/resources/others/Welcome/keys.png
+
 Last is the tutorial part
 
 Order:
@@ -21,3 +26,5 @@ Order:
 - Pipe
 - Hole
 - Box
+- Castle
+- Static Images e.g. for array

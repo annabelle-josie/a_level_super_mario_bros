@@ -13,6 +13,8 @@
 2100, 300, coin
 2150, 300, none
 
+3300, 100
+
 250, 100, 250, 250, src/resources/others/Welcome/keys.png
 700, 100, 250, 250, src/resources/others/Welcome/up.png
 950, 100, 250, 250, src/resources/others/Welcome/goomba.png
