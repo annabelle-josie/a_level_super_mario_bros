@@ -21,4 +21,4 @@
 1200, 100, 250, 250, src/resources/others/Welcome/youKill.png
 1550, 100, 250, 250, src/resources/others/Welcome/obstacles.png
 2000, 100, 250, 250, src/resources/others/Welcome/boxes.png
-2500, 100, 250, 250, src/resources/others/Welcome/score.png
+2650, 100, 250, 250, src/resources/others/Welcome/score.png

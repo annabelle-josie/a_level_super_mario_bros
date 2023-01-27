@@ -5,6 +5,7 @@ public class Box extends GameObject {
     protected boolean collected;
     protected int flicker;
     protected boolean jumping;
+    protected boolean animating;
 
     public Box(int xIN, int yIN, String inside) {
         super(xIN, yIN, 50, 50);
@@ -33,7 +34,11 @@ public class Box extends GameObject {
         }
     }
 
-    public Boolean powerup(){
+    public Boolean isAnimating(){
+        return animating;
+    }
+
+    public void powerup(){
         if(contain.equals("coin")){
             contain = "empty";
         }
@@ -41,22 +46,22 @@ public class Box extends GameObject {
             if (totalJumped < 10) {
                 y = y - 2;
                 totalJumped++;
-                return true;
+                animating = true;
             } else if (totalJumped == 21) {
                 jumping = false;
                 collected = true;
                 if (contain.equals("none")) {
                     hidden = true;
                 }
-                return false;
+                animating = false;
             } else {
                 y = y + 2;
                 //y = y + (20-totalJumped);
                 totalJumped++;
-                return true;
+                animating = true;
             }
         } else{
-            return false;
+            animating = false;
         }
     }
 

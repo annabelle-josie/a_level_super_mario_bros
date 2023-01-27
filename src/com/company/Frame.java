@@ -55,7 +55,8 @@ public class Frame extends JFrame {
     ArrayList<Box> boxArray = new ArrayList<>();
     ArrayList<GameObject> collisionArray = new ArrayList<>();
     ArrayList<GameObject> tutorialArray = new ArrayList<>();
-    ArrayList<GameObject> extraItems = new ArrayList<>(); //If paint is condensed into using objectArray then no necessary
+    ArrayList<GameObject> extraItems = new ArrayList<>(); //If paint is condensed into using objectArray then not necessary
+    //ArrayList<GameObject> toAnimate = new ArrayList<>();
 
     public static void main(String[] args) {
         new Frame();
@@ -139,7 +140,7 @@ public class Frame extends JFrame {
                         castle = new GameObject(Integer.parseInt(values[0]), Integer.parseInt(values[1]), 400, 400, "src/resources/others/castle.png");
                         tutorialArray.add(castle);
                     } else if (current == 5){
-                        //Extra (mostly for tutorial)
+                        //Others (mostly for tutorial images)
                         String[] values = data.split(", ");
                         tutorialArray.add(new GameObject(Integer.parseInt(values[0]), Integer.parseInt(values[1]), Integer.parseInt(values[2]), Integer.parseInt(values[3]), values[4]));
                     }
@@ -147,7 +148,9 @@ public class Frame extends JFrame {
             }
             myReader.close();
         } catch (FileNotFoundException e){
-            
+            jumping = false;
+            mannequinMario.resetValues(0,450,50,50);
+            screen="winner";
             System.out.println("Level file could not be read, try again");
             e.printStackTrace();
         }
@@ -167,6 +170,11 @@ public class Frame extends JFrame {
                 mannequinGoomba.setChange(0);
                 mannequinGoomba.spot();
                 mannequinMario.spot();
+            } else if (screen.equals("winner")) {
+                if (mannequinMario.getRightX() < 350) {
+                    mannequinMario.moveRight(5);
+                    mannequinMario.setLeftX(mannequinMario.getLeftX() + 5);
+                }
             } else if (gameOver || mario.getBottomY() + 20 >= 600) { //Makes mario fall off-screen, then switch the screen to --GAME OVER--
                 mario.die(); //Mario falls off-screen
                 if (mario.getBottomY() >= 600) { //When Mario reaches the bottom
@@ -184,6 +192,11 @@ public class Frame extends JFrame {
                     if (extraItems.get(0).jump()) {
                         score = score + 1;
                         extraItems.remove(0);
+                    }
+                }
+                for (Box box : boxArray) {
+                    if (box.isAnimating()) {
+                        box.powerup();
                     }
                 }
                 /*Villain Animate*/
@@ -254,10 +267,10 @@ public class Frame extends JFrame {
             this.canvas.repaint(); //Repaints Canvas
         }
 
-    public void setUpStart(){
+    public void mannequins(){
         if(mannequinMario == null) {
-            mannequinMario = new Mario("src/resources/right/SmallStand.png", 450, 400, 100, 100);
-            mannequinGoomba = new Villain(250, 400, 100, 100);
+            mannequinMario = new Mario("src/resources/right/SmallStand.png", 450, 405, 100, 100);
+            mannequinGoomba = new Villain(250, 405, 100, 100);
         }
     }
 
@@ -270,7 +283,7 @@ public class Frame extends JFrame {
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             switch (screen) {
                 case "startScreen" -> {
-                    setUpStart();
+                    mannequins();
                     //Start Screen
                     ImageIcon ii = new ImageIcon("src/resources/others/startScreen.png");
                     Image gameOverScreen = ii.getImage();
@@ -285,7 +298,6 @@ public class Frame extends JFrame {
                     ImageIcon i2 = new ImageIcon(mannequinMario.image());
                     Image marioIcon = i2.getImage();
                     g2.drawImage(marioIcon, mannequinMario.getLeftX(), mannequinMario.getTopY(), mannequinMario.getW(), mannequinMario.getH(), this);
-
                 }
                 case "levelSelect"-> {
                     //Start Screen
@@ -322,12 +334,12 @@ public class Frame extends JFrame {
                     g2.drawImage(scoreImg, 483, 30, 75, 50, this);
 
                     //Level
-                    ImageIcon levelIcon = new ImageIcon("src/resources/others/numbers/1.png");
+                    ImageIcon levelIcon = new ImageIcon("src/resources/others/numbers/"+level+".png");
                     Image levelImg = levelIcon.getImage();
                     g2.drawImage(levelImg, 695, 30, 50, 50, this);
 
                     for (GameObject gameObject : tutorialArray) {
-                        ImageIcon theIcon = new ImageIcon(gameObject.getImage());
+                        ImageIcon theIcon = new ImageIcon(gameObject.image());
                         Image theImage = theIcon.getImage();
                         g2.drawImage(theImage, gameObject.getLeftX(), gameObject.getTopY(), gameObject.getW(), gameObject.getH(), this);
                     }
@@ -368,7 +380,7 @@ public class Frame extends JFrame {
                     }
 
                     for (GameObject gameObject : extraItems) {
-                        ImageIcon theIcon = new ImageIcon(gameObject.getImage());
+                        ImageIcon theIcon = new ImageIcon(gameObject.image());
                         Image theImage = theIcon.getImage();
                         g2.drawImage(theImage, gameObject.getLeftX(), gameObject.getTopY(), gameObject.getW(), gameObject.getH(), this);
                     }
@@ -394,10 +406,9 @@ public class Frame extends JFrame {
                     g2.drawImage(scoreImg, 483, 30, 75, 50, this);
 
                     //Level
-                    ImageIcon levelIcon = new ImageIcon("src/resources/others/numbers/1.png");
+                    ImageIcon levelIcon = new ImageIcon("src/resources/others/numbers/"+level+".png");
                     Image levelImg = levelIcon.getImage();
                     g2.drawImage(levelImg, 695, 30, 50, 50, this);
-
                 }
                 case "gameOver" -> {
                     //White background
@@ -410,6 +421,36 @@ public class Frame extends JFrame {
                     Image gameOverScreen = ii.getImage();
                     g2.drawImage(gameOverScreen, 100, -50, 600, 600, this);
 
+                }
+                case "winner" ->{
+                    ImageIcon backgroundIcon = new ImageIcon("src/resources/others/winnerBackground.png");
+                    Image background = backgroundIcon.getImage();
+                    g2.drawImage(background, 0, 0, 800, 600, this);
+
+                    //Coin Count
+                    ImageIcon coinIcon = new ImageIcon("src/resources/others/numbers/" + coins + ".png");
+                    Image coinImg = coinIcon.getImage();
+                    g2.drawImage(coinImg, 295, 30, 50, 50, this);
+
+                    //Score
+                    ImageIcon scoreIcon = new ImageIcon("src/resources/others/numbers/" + score +"00.png");
+                    Image scoreImg = scoreIcon.getImage();
+                    g2.drawImage(scoreImg, 483, 30, 75, 50, this);
+
+                    //Level
+                    ImageIcon levelIcon = new ImageIcon("src/resources/others/numbers/"+level+".png");
+                    Image levelImg = levelIcon.getImage();
+                    g2.drawImage(levelImg, 695, 30, 50, 50, this);
+
+                    //Peach
+                    ImageIcon peachIcon = new ImageIcon("src/resources/others/peach.png");
+                    Image peachImage = peachIcon.getImage();
+                    g2.drawImage(peachImage, 400, 450, 35, 50, this);
+
+                    //Mario
+                    ImageIcon i2 = new ImageIcon(mannequinMario.image());
+                    Image marioIcon = i2.getImage();
+                    g2.drawImage(marioIcon,mannequinMario.getLeftX(), mannequinMario.getTopY(), 50, 50, this);
                 }
             }
         }
@@ -438,6 +479,14 @@ public class Frame extends JFrame {
                             screen="level";
                             resetLevel();
                         }
+                        case "level" ->{
+                            if (!jumping) {
+                                //Frame.ukd = true;
+                                mario.setJumpCount(0);
+                                jumping = true;
+                                up = true;
+                            }
+                        }
                     }
                     break;
                 case 48: //0 key
@@ -453,7 +502,7 @@ public class Frame extends JFrame {
                 case 37: //Left Arrow Key
                     Frame.lkd = true;
                     break;
-                case 38: //Down Arrow Key
+                case 38: //Up Arrow Key
                     if (!jumping) {
                         //Frame.ukd = true;
                         mario.setJumpCount(0);
@@ -481,6 +530,11 @@ public class Frame extends JFrame {
                     score = 0;
                     coins = 0;
                     break;
+                case 87: //W key
+                    screen="winner";
+                    jumping = false;
+                    mannequinMario.resetValues(0,450,50,50);
+                    break;
             }
         }
 
@@ -490,10 +544,7 @@ public class Frame extends JFrame {
                         Frame.lkd = false;
                 case 39 -> //Right Arrow Key
                         Frame.rkd = false;
-                case 40 -> //Down Arrow Key
-                        Frame.dkd = false;
-
-                //Left Arrow Key release not needed as handled by the jump function
+                //Up Arrow Key release not needed as handled by the jump function
             }
         }
     }
@@ -556,26 +607,27 @@ public class Frame extends JFrame {
                         if (character.getTopY() >= gameObject.getBottomY() && ((character.getRightX() >= gameObject.getLeftX() && character.getLeftX() <= gameObject.getRightX()))) {
                             character.setCanMoveLeft(true);
                             character.setCanMoveRight(true);
+                            character.setCanMoveUp(true);
                             //This is detecting the part underneath only
-                            if (character.getTopY() - 20 < gameObject.getBottomY() || boxAnimating) {
-                                character.moveUp(character.getTopY() - gameObject.getBottomY());
-                                character.setCanMoveUp(false);
-                                //Can currently click two boxes at once, not sure if that is a problem?
-                                //I'm leaving it until I decide it is a problem
-                                if (gameObject.isNotCollected()) {
-                                    if (gameObject.contains().equals("coin")) {
-                                        extraItems.add(new GameObject(gameObject.getLeftX() + 10, gameObject.getTopY() - 40, 30, 40));
-                                        extraItems.get(0).setImage("src/resources/others/coin.png");
-                                        objectArray.add(extraItems.get(extraItems.size()-1));
-                                        coins++;
-                                        if(level == 0){
-                                            tutorialArray.get(6).setImage("src/resources/others/Welcome/coin.png");
+                            if((character.getTopY() - gameObject.getBottomY()) < 30) {
+                                if (character.getTopY() - 20 < gameObject.getBottomY() || boxAnimating) {
+                                    character.moveUp(character.getTopY() - gameObject.getBottomY());
+                                    character.setCanMoveUp(false);
+                                    //Can currently click two boxes at once, not sure if that is a problem?
+                                    //I'm leaving it until I decide it is a problem
+                                    if (gameObject.isNotCollected()) {
+                                        if (gameObject.contains().equals("coin")) {
+                                            extraItems.add(new GameObject(gameObject.getLeftX() + 10, gameObject.getTopY() - 40, 30, 40));
+                                            extraItems.get(0).setImage("src/resources/others/coin.png");
+                                            objectArray.add(extraItems.get(extraItems.size() - 1));
+                                            coins++;
+                                            if (level == 0) {
+                                                tutorialArray.get(6).setImage("src/resources/others/Welcome/coin.png");
+                                            }
                                         }
+                                        gameObject.powerup();
                                     }
-                                    boxAnimating = gameObject.powerup();
                                 }
-                            } else {
-                                character.setCanMoveUp(true);
                             }
                         } else {
                             //If on the right-hand side

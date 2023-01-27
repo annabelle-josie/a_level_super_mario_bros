@@ -114,6 +114,13 @@ public class Mario extends Character {
         direction = "right";
         animate();
     }
+
+    public void resetValues(int xIn, int yIn, int wIn, int hIn){
+        x = xIn;
+        y = yIn;
+        w = wIn;
+        h = hIn;
+    }
 }
 
 

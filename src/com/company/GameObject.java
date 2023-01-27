@@ -70,9 +70,8 @@ public class GameObject {
         return hidden;
     }
 
-    public Boolean powerup(){
+    public void powerup(){
         //Filler for pipe and brick using same collision detection
-        return false;
     }
     public Boolean isNotCollected(){
         //Filler for box collection
@@ -83,7 +82,7 @@ public class GameObject {
     }
 
     public void setImage(String imageEntered){image = imageEntered;}
-    public String getImage(){
+    public String image(){
         return image;
     }
 
