@@ -10,6 +10,10 @@ public class Villain extends Character{
         super(xIN, yIN, wIN, hIN);
         theImage = "src/resources/others/goomba2.png";
     }
+    public Villain (String image, int xIN, int yIN, int wIN, int hIN){
+        super(xIN, yIN, wIN, hIN);
+        theImage = image;
+    }
 
     public String image(){
         return theImage;

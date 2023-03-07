@@ -41,23 +41,46 @@ public class Mario extends Character {
     public String image(){
         return theImage;
     }
-
-    public void moveLeft(int d){
+    public void moveLeft(){
         if (canMoveLeft){
             direction = "left";
             animate();
         } else {
             theImage = "src/resources/left/smallStand.png";
         }
-    }
-    public void moveRight(int d){
+    } //Animation
+    public void moveLeft(int d){
+        if (canMoveDown) {
+            moveDown(5);
+        }
+        if (x >= 0 && canMoveLeft){
+            x = x-d;
+            direction = "left";
+            animate();
+        } else {
+            theImage = "src/resources/left/smallStand.png";
+        }
+    } //Actual Movement (only for winner screen)
+    public void moveRight(){
         if (canMoveRight){
             direction = "right";
             animate();
         } else {
             theImage = "src/resources/right/smallStand.png";
         }
-    }
+    } //Animation
+    public void moveRight(int d){
+        if (canMoveDown) {
+            moveDown(5);
+        }
+        if ((x+d) <= (800-w) && canMoveRight){
+            x = x+d;
+            direction = "right";
+            animate();
+        }else {
+            theImage = "src/resources/right/smallStand.png";
+        }
+    } //Actual Movement (only for winner screen)
 
     public void moveUp(int d){
         if ((y-d) >= 0 && canMoveUp){
@@ -83,7 +106,7 @@ public class Mario extends Character {
 
     public Boolean jump(Boolean up, int height){
         if (up && jumpCount <= height){
-            moveUp((20 - jumpCount));
+            moveUp((height - jumpCount));
             jumpCount++;
             return true;
         } else if (!up && canMoveDown){

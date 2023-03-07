@@ -1,9 +1,3 @@
-/*
-Notes for next time
-- When falling off a pipe onto a Goomba, Mario dies. In the original game this does not happen, instead he kills them.
-The current algorithm uses jump functions to determine whether the Goomba should be killed. This is not going to work long term
- */
-
 package com.company;
 
 import java.awt.*;
@@ -22,17 +16,16 @@ public class Frame extends JFrame {
     int score = 0;
     int level = 1;
     int coins = 0;
-    int totalMoved = 0;
+    int totalMoved = 0; //totalMoved and currentGround are both used for detecting holes
     int currentGround = 0;
-    boolean boxAnimating = false;
-    int transparentPlacement = 310;
-    Boolean winnerAnimate = false;
+    boolean boxAnimating = false; //For the completion of movement of boxes
+    int transparentPlacement = 310; //For level select
+    Villain bowser;
 
     /*Key Listeners*/
     private Frame.KeyLis listener;
     static Boolean lkd = false;
     static Boolean rkd = false;
-    static Boolean dkd = false;
 
     /*To change the screen*/
     Boolean gameOver = false;
@@ -40,13 +33,14 @@ public class Frame extends JFrame {
 
     /*Jumping Variables*/
     Boolean jumping = false;
-    Boolean up = false; //Is moving up
+    Boolean up = false; //Is it moving up?
 
     /*Things*/
-    Mario mannequinMario;
+    Mario mannequinMario; //Mannequins are for the moving Mario and Goomba on the startScreen
     Villain mannequinGoomba;
     Mario mario;
     GameObject castle;
+    ImageIcon bowserIcon = new ImageIcon("src/resources/others/bowser.png"); //Set as global so can be changed in tick and accessed in paint
     ArrayList<Character> characterArray = new ArrayList<>();
     ArrayList<Villain> villainArray = new ArrayList<>();
     ArrayList<ArrayList<GameObject>> ground = new ArrayList<>();
@@ -56,19 +50,18 @@ public class Frame extends JFrame {
     ArrayList<GameObject> collisionArray = new ArrayList<>();
     ArrayList<GameObject> tutorialArray = new ArrayList<>();
     ArrayList<GameObject> extraItems = new ArrayList<>(); //If paint is condensed into using objectArray then not necessary
-    //ArrayList<GameObject> toAnimate = new ArrayList<>();
 
     public static void main(String[] args) {
-        new Frame();
+        new Frame(); //Instantiates the frame, everything is then run through this
     }
 
     public Frame() {
         this.setSize(800, 627); //627 to make up for bar at top
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE); //Kills code on close
         this.setTitle("Mario");
-        resetLevel();
-        this.add(this.canvas); //Add the painted area
-        this.setVisible(true);
+        resetLevel(); //This resets all values, taking information from level files if needed
+        this.add(this.canvas); //Add the painted area (where all components lie)
+        this.setVisible(true); //Make the window visible
 
         /*Timer*/
         this.t = new Timer(10, (e) -> this.tick()); //Runs variable tick - collisions tick, move, repaint
@@ -96,6 +89,7 @@ public class Frame extends JFrame {
         /*Instantiating the items*/
         mario = new Mario("src/resources/right/SmallStand.png", 100, 450, 50, 50);
         characterArray.add(mario);
+        bowserIcon = new ImageIcon("src/resources/others/bowser.png");
 
         /*Make array of  ground*/
         for (int r = 0; r < 2; r++) {
@@ -104,58 +98,81 @@ public class Frame extends JFrame {
                 ground.get(r).add( c , new GameObject( c * 50, 550 - (r * 50), 50, 50));
             }
         }
-        String file = ("src/resources/level"+level+".txt");
-        //Now the only bit that needs changing for each level is the text file!!!
-        int current = 0;
+        
+        String file = ("src/resources/level"+level+".txt"); //Each level can be made from an imported txt file
+        int current = 0; //A counter to go through each object adding them to the correct arrays
         try {
             File inputFile = new File(file);
             Scanner myReader = new Scanner(inputFile);
             while (myReader.hasNextLine()){
                 String data = myReader.nextLine();
                 if(data.equals("")){
+                    //Files are built so a line is left between the different objects
                     current++;
                 } else {
                     if (current == 0) {
-                        //Goombas
+                        //Goombas - Inputs x, y
                         String[] values = data.split(", ");
-                        villainArray.add(new Villain(Integer.parseInt(values[0]), Integer.parseInt(values[1]), 50, 50));
+                        villainArray.add(new Villain(Integer.parseInt(values[0]), Integer.parseInt(values[1]), 50, 50)); //Set width/height of 50/50
                         characterArray.add(villainArray.get(villainArray.size()-1));
                     } else if (current == 1) {
-                        //Pipes
+                        //Pipes - Inputs x, y, w, h
                         String[] values = data.split(", ");
                         pipeArray.add(new GameObject(Integer.parseInt(values[0]), Integer.parseInt(values[1]), Integer.parseInt(values[2]), Integer.parseInt(values[3])));
                     } else if (current == 2){
-                        //Holes
+                        //Holes - Inputs brick number to be hidden. Creates width of 2, so if 5 inputted, 5 and 6 will be the hole
                         for (int j = 0; j < 2 ; j++) {
                             for (int i = 0; i < 2; i++) {
                                 ground.get(i).get(Integer.parseInt(data) + j).setHidden(true);
                             }   
                         }
                     } else if (current == 3){
-                        //Boxes (in sky)
+                        //Boxes - Inputs x, y, and contents (coin, none, powerup, block)
                         String[] values = data.split(", ");
-                        boxArray.add(new Box(Integer.parseInt(values[0]), Integer.parseInt(values[1]), values[2]));
-                    }else if (current == 4){
+                        if(values[2].equals("block")){ //This means that the blocks can be added downwards until they meet the ground.
+                            // This reduces the size of the txt files and makes them far easier to write
+                            for (int i = 0; (Integer.parseInt(values[1])+ i*50) < 500; i++) {
+                                boxArray.add(new Box( Integer.parseInt(values[0]),Integer.parseInt(values[1])+i*50, values[2]));
+                            }
+                        } else{
+                            boxArray.add(new Box(Integer.parseInt(values[0]), Integer.parseInt(values[1]), values[2]));
+                        }
+                    } else if (current == 4){
+                        //Castle - Inputs x, y for castle aka end of the level
                         String[] values = data.split(", ");
                         castle = new GameObject(Integer.parseInt(values[0]), Integer.parseInt(values[1]), 400, 400, "src/resources/others/castle.png");
                         tutorialArray.add(castle);
                     } else if (current == 5){
-                        //Others (mostly for tutorial images)
+                        //Others (mostly for tutorial images) - Inputs x, y, w, h, Image file
                         String[] values = data.split(", ");
                         tutorialArray.add(new GameObject(Integer.parseInt(values[0]), Integer.parseInt(values[1]), Integer.parseInt(values[2]), Integer.parseInt(values[3]), values[4]));
                     }
                 }
             }
             myReader.close();
-        } catch (FileNotFoundException e){
+        } catch (FileNotFoundException e){ //If the file doesn't exist
+            //This is most likely (almost certainly) because the level is too high
+            //Therefore they must have run out of levels aka won so screen is changed to winner
+            totalMoved = 0;
+            currentGround = 2;
+            ground.clear();
+            villainArray.clear();
+            characterArray.clear();
+            pipeArray.clear();
+            boxArray.clear();
+            objectArray.clear();
+            collisionArray.clear();
+            extraItems.clear();
+            tutorialArray.clear();
+
             jumping = false;
-            mannequinMario.resetValues(0,450,50,50);
+            mario.resetValues(0,450,50,50);
+            bowser = new Villain( "src/resources/others/bowser.png", 500, 350, 150, 150);
             screen="winner";
-            System.out.println("Level file could not be read, try again");
-            e.printStackTrace();
+            //System.out.println("Level file could not be read, try again");
+            //e.printStackTrace();
         }
-
-
+        /*All objects added to larger arrays for later use*/
         objectArray.addAll(pipeArray);
         objectArray.addAll(ground.get(0));
         objectArray.addAll(ground.get(1));
@@ -166,16 +183,29 @@ public class Frame extends JFrame {
     }
 
     public void tick() {
-            if (screen.equals("startScreen")) {
+            if (screen.equals("startScreen")) { //Mario and Goomba with animations for start screen
                 mannequinGoomba.setChange(0);
                 mannequinGoomba.spot();
                 mannequinMario.spot();
-            } else if (screen.equals("winner")) {
-                if (mannequinMario.getRightX() < 350) {
-                    mannequinMario.moveRight(5);
-                    mannequinMario.setLeftX(mannequinMario.getLeftX() + 5);
+            }
+            else if (screen.equals("winner")) {
+                if(mario.getLeftX() < 450) { //Whilst Mario has not gone past Peach
+                    //collisionDetection(); //Check for all collisions and correct them
+                    if (lkd) {
+                        mario.moveLeft(5);
+                    } else if (rkd) {
+                        mario.moveRight(5);
+                    }
+
+                    if (mario.getLeftX() > 250) { //If next to Bowser
+                        bowserIcon = new ImageIcon("src/resources/defeat.png"); //Bowser is defeated
+                    }
+                } else{ //After past Peach, restart the game
+                    screen="startScreen";
                 }
-            } else if (gameOver || mario.getBottomY() + 20 >= 600) { //Makes mario fall off-screen, then switch the screen to --GAME OVER--
+                canvas.repaint();
+            }
+            else if (gameOver || mario.getBottomY() + 20 >= 600) { //Makes mario fall off-screen, then switch the screen to --GAME OVER--
                 mario.die(); //Mario falls off-screen
                 if (mario.getBottomY() >= 600) { //When Mario reaches the bottom
                     try {
@@ -208,7 +238,7 @@ public class Frame extends JFrame {
                 }
                 if (lkd) { //Move left
                     if (mario.canMoveLeft && (totalMoved - 5 > 0)) {
-                        mario.moveLeft(5);
+                        mario.moveLeft();
                         totalMoved = totalMoved - 5;
                         //Turn this into an array of arrays and go through all changing x
 
@@ -237,14 +267,11 @@ public class Frame extends JFrame {
                     if (screen.equals("level") && mario.getLeftX() + 5 > castle.getLeftX()+180) {
                         mario.moveRight(5);
                         totalMoved = totalMoved + 5;
-                        System.out.println("You've won");
                         screen = "levelUp";
                         canvas.repaint();
                     } else if (mario.canMoveRight) {
-                        mario.moveRight(5);
+                        mario.moveRight();
                         totalMoved = totalMoved + 5;
-                        //Turn this into an array of arrays and go through all changing x
-
                         /*Villain Right*/
                         for (Villain villain : villainArray) {
                             villain.setLeftX(villain.getLeftX() - 5);
@@ -445,12 +472,16 @@ public class Frame extends JFrame {
                     //Peach
                     ImageIcon peachIcon = new ImageIcon("src/resources/others/peach.png");
                     Image peachImage = peachIcon.getImage();
-                    g2.drawImage(peachImage, 400, 450, 35, 50, this);
+                    g2.drawImage(peachImage, 500, 450, 35, 50, this);
+
+                    //Bowser
+                    Image bowserImage = bowserIcon.getImage(); //bowserIcon is universal so it can be removed
+                    g2.drawImage(bowserImage, 300, 350, 150, 150, this);
 
                     //Mario
-                    ImageIcon i2 = new ImageIcon(mannequinMario.image());
+                    ImageIcon i2 = new ImageIcon(mario.image());
                     Image marioIcon = i2.getImage();
-                    g2.drawImage(marioIcon,mannequinMario.getLeftX(), mannequinMario.getTopY(), 50, 50, this);
+                    g2.drawImage(marioIcon,mario.getLeftX(), mario.getTopY(), 50, 50, this);
                 }
             }
         }
@@ -462,6 +493,11 @@ public class Frame extends JFrame {
 
         public void keyPressed(KeyEvent e) {
             switch (e.getKeyCode()) {
+                case 16: //shift, only for debugging DELETE BEFORE HANDING IN
+                    screen = "level";
+                    level = 2;
+                    resetLevel();
+                    break;
                 case 32: //Space Key
                     switch (screen) {
                         case "startScreen" -> screen = "levelSelect";
@@ -512,8 +548,6 @@ public class Frame extends JFrame {
                     break;
                 case 39: //Right Arrow Key
                     Frame.rkd = true;
-                case 40: //Down Arrow Key
-                    Frame.dkd = true;
                     break;
                 case 68: //D Key
                     gameOver = true;
@@ -531,9 +565,8 @@ public class Frame extends JFrame {
                     coins = 0;
                     break;
                 case 87: //W key
-                    screen="winner";
-                    jumping = false;
-                    mannequinMario.resetValues(0,450,50,50);
+                    level=500;
+                    resetLevel();
                     break;
             }
         }
@@ -686,5 +719,23 @@ public class Frame extends JFrame {
                 }
             }
         }
+    }
+
+    public void winnerCollisions(){
+        mario.setCanMoveDown(mario.getBottomY() + 20 <= ground.get(0).get(0).getTopY());
+
+            if (!bowser.isHidden()) {
+                if (mario.getRightX() > bowser.getLeftX() && mario.getLeftX() < bowser.getRightX()) {
+                    if (mario.getBottomY()+20 > bowser.getTopY() && mario.getBottomY() < bowser.getTopY()) {
+                        //if jumping is true and up = false then he is falling and can squish
+                        //else Mario kills Goomba
+                        bowser.setImage("");
+                        score++;
+                    } else if (mario.getBottomY() > bowser.getTopY()) {
+                        //If Goomba kills Mario
+                        mario.setCanMoveLeft(false);
+                    }
+                }
+            }
     }
 }

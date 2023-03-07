@@ -13,6 +13,7 @@ A new line is then left and the next inputs are for boxes
 Each box takes 3 inputs, x, y and contents.
 Contents should be "none", "coin", "powerup". If it contains something else, it will show a ? box but no powerup will be applied
 The standard y values for boxes are 300 and 150
+Contents could also be "block" this produces a box that cannot break
 
 A new line is then left and then the x and y co-ordinates of the castle are given
 
