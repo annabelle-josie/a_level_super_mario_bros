@@ -3,12 +3,12 @@ package com.company;
 public class Villain extends Character{
     private String theImage;
     private int number;
-    private String[] goombaSet = {"src/resources/others/goomba1.png", "src/resources/others/goomba2.png"};
+    private String[] goombaSet = {"src/resources/characters/goomba1.png", "src/resources/characters/goomba2.png"};
     private int xChange = -1;
 
     public Villain (int xIN, int yIN, int wIN, int hIN){
         super(xIN, yIN, wIN, hIN);
-        theImage = "src/resources/others/goomba2.png";
+        theImage = "src/resources/characters/goomba2.png";
     }
     public Villain (String image, int xIN, int yIN, int wIN, int hIN){
         super(xIN, yIN, wIN, hIN);

@@ -40,7 +40,7 @@ public class Frame extends JFrame {
     Villain mannequinGoomba;
     Mario mario;
     GameObject castle;
-    ImageIcon bowserIcon = new ImageIcon("src/resources/others/bowser.png"); //Set as global so can be changed in tick and accessed in paint
+    ImageIcon bowserIcon = new ImageIcon("src/resources/characters/bowser.png"); //Set as global so can be changed in tick and accessed in paint
     ArrayList<Character> characterArray = new ArrayList<>();
     ArrayList<Villain> villainArray = new ArrayList<>();
     ArrayList<ArrayList<GameObject>> ground = new ArrayList<>();
@@ -89,13 +89,13 @@ public class Frame extends JFrame {
         /*Instantiating the items*/
         mario = new Mario("src/resources/right/SmallStand.png", 100, 450, 50, 50);
         characterArray.add(mario);
-        bowserIcon = new ImageIcon("src/resources/others/bowser.png");
+        bowserIcon = new ImageIcon("src/resources/characters/bowser.png");
 
         /*Make array of  ground*/
         for (int r = 0; r < 2; r++) {
             ground.add(new ArrayList<>());
             for (int c = 0; c < 200;  c++) {
-                ground.get(r).add( c , new GameObject( c * 50, 550 - (r * 50), 50, 50));
+                ground.get(r).add(c , new GameObject( c * 50, 550 - (r * 50), 50, 50));
             }
         }
         
@@ -140,7 +140,7 @@ public class Frame extends JFrame {
                     } else if (current == 4){
                         //Castle - Inputs x, y for castle aka end of the level
                         String[] values = data.split(", ");
-                        castle = new GameObject(Integer.parseInt(values[0]), Integer.parseInt(values[1]), 400, 400, "src/resources/others/castle.png");
+                        castle = new GameObject(Integer.parseInt(values[0]), Integer.parseInt(values[1]), 400, 400, "src/resources/items/castle.png");
                         tutorialArray.add(castle);
                     } else if (current == 5){
                         //Others (mostly for tutorial images) - Inputs x, y, w, h, Image file
@@ -167,7 +167,7 @@ public class Frame extends JFrame {
 
             jumping = false;
             mario.resetValues(0,450,50,50);
-            bowser = new Villain( "src/resources/others/bowser.png", 500, 350, 150, 150);
+            bowser = new Villain( "src/resources/characters/bowser.png", 500, 350, 150, 150);
             screen="winner";
             //System.out.println("Level file could not be read, try again");
             //e.printStackTrace();
@@ -312,7 +312,7 @@ public class Frame extends JFrame {
                 case "startScreen" -> {
                     mannequins();
                     //Start Screen
-                    ImageIcon ii = new ImageIcon("src/resources/others/startScreen.png");
+                    ImageIcon ii = new ImageIcon("src/resources/screens/startScreen.png");
                     Image gameOverScreen = ii.getImage();
                     g2.drawImage(gameOverScreen, 0, 0, 800, 600, this);
 
@@ -328,7 +328,7 @@ public class Frame extends JFrame {
                 }
                 case "levelSelect"-> {
                     //Start Screen
-                    ImageIcon ii = new ImageIcon("src/resources/others/levelSelect.png");
+                    ImageIcon ii = new ImageIcon("src/resources/screens/levelSelect.png");
                     Image gameOverScreen = ii.getImage();
                     g2.drawImage(gameOverScreen, 0, 0, 800, 600, this);
 
@@ -343,25 +343,25 @@ public class Frame extends JFrame {
                     //Background
                     ImageIcon skyIcon;
                     if(level == 0) {
-                        skyIcon = new ImageIcon("src/resources/others/noCloudBackground.png");
+                        skyIcon = new ImageIcon("src/resources/screens/noCloudBackground.png");
                     } else{
-                        skyIcon = new ImageIcon("src/resources/others/levelBackground.png");
+                        skyIcon = new ImageIcon("src/resources/screens/levelBackground.png");
                     }
                     Image sky = skyIcon.getImage();
                     g2.drawImage(sky, 0, 0, 800, 600, this);
                     
                     //Coin Count
-                    ImageIcon coinIcon = new ImageIcon("src/resources/others/numbers/" + coins + ".png");
+                    ImageIcon coinIcon = new ImageIcon("src/resources/numbers/" + coins + ".png");
                     Image coinImg = coinIcon.getImage();
                     g2.drawImage(coinImg, 295, 30, 50, 50, this);
 
                     //Score
-                    ImageIcon scoreIcon = new ImageIcon("src/resources/others/numbers/" + score +"00.png");
+                    ImageIcon scoreIcon = new ImageIcon("src/resources/numbers/" + score +"00.png");
                     Image scoreImg = scoreIcon.getImage();
                     g2.drawImage(scoreImg, 483, 30, 75, 50, this);
 
                     //Level
-                    ImageIcon levelIcon = new ImageIcon("src/resources/others/numbers/"+level+".png");
+                    ImageIcon levelIcon = new ImageIcon("src/resources/numbers/"+level+".png");
                     Image levelImg = levelIcon.getImage();
                     g2.drawImage(levelImg, 695, 30, 50, 50, this);
 
@@ -373,13 +373,13 @@ public class Frame extends JFrame {
 
                     //Pipe
                     for (GameObject gameObject : pipeArray) {
-                        ImageIcon pipeIcon = new ImageIcon("src/resources/others/pipe.png");
+                        ImageIcon pipeIcon = new ImageIcon("src/resources/items/pipe.png");
                         Image pipeImg = pipeIcon.getImage();
                         g2.drawImage(pipeImg, gameObject.getLeftX(), gameObject.getTopY(), gameObject.getW(), gameObject.getH(), this);
                     }
 
                     //Array of blocks for ground
-                    ImageIcon groundIcon = new ImageIcon("src/resources/others/ground.png");
+                    ImageIcon groundIcon = new ImageIcon("src/resources/items/ground.png");
                     Image groundImg = groundIcon.getImage();
                     for (int r = 0; r < 2; r++) {
                         for (int c = 0; c < 200; c++) {
@@ -418,22 +418,22 @@ public class Frame extends JFrame {
                     g2.drawImage(marioIcon, mario.getLeftX(), mario.getTopY(), mario.getW(), mario.getH(), this);
                 }
                 case "levelUp" ->{
-                    ImageIcon backgroundIcon = new ImageIcon("src/resources/others/levelUp.png");
+                    ImageIcon backgroundIcon = new ImageIcon("src/resources/screens/levelUp.png");
                     Image background = backgroundIcon.getImage();
                     g2.drawImage(background, 0, 0, 800, 600, this);
 
                     //Coin Count
-                    ImageIcon coinIcon = new ImageIcon("src/resources/others/numbers/" + coins + ".png");
+                    ImageIcon coinIcon = new ImageIcon("src/resources/numbers/" + coins + ".png");
                     Image coinImg = coinIcon.getImage();
                     g2.drawImage(coinImg, 295, 30, 50, 50, this);
 
                     //Score
-                    ImageIcon scoreIcon = new ImageIcon("src/resources/others/numbers/" + score +"00.png");
+                    ImageIcon scoreIcon = new ImageIcon("src/resources/numbers/" + score +"00.png");
                     Image scoreImg = scoreIcon.getImage();
                     g2.drawImage(scoreImg, 483, 30, 75, 50, this);
 
                     //Level
-                    ImageIcon levelIcon = new ImageIcon("src/resources/others/numbers/"+level+".png");
+                    ImageIcon levelIcon = new ImageIcon("src/resources/numbers/"+level+".png");
                     Image levelImg = levelIcon.getImage();
                     g2.drawImage(levelImg, 695, 30, 50, 50, this);
                 }
@@ -444,33 +444,33 @@ public class Frame extends JFrame {
                     g2.fill(background);
 
                     //Black Game Over Text
-                    ImageIcon ii = new ImageIcon("src/resources/others/gameOverScreen.png");
+                    ImageIcon ii = new ImageIcon("src/resources/screens/gameOverScreen.png");
                     Image gameOverScreen = ii.getImage();
                     g2.drawImage(gameOverScreen, 100, -50, 600, 600, this);
 
                 }
                 case "winner" ->{
-                    ImageIcon backgroundIcon = new ImageIcon("src/resources/others/winnerBackground.png");
+                    ImageIcon backgroundIcon = new ImageIcon("src/resources/screens/winnerBackground.png");
                     Image background = backgroundIcon.getImage();
                     g2.drawImage(background, 0, 0, 800, 600, this);
 
                     //Coin Count
-                    ImageIcon coinIcon = new ImageIcon("src/resources/others/numbers/" + coins + ".png");
+                    ImageIcon coinIcon = new ImageIcon("src/resources/numbers/" + coins + ".png");
                     Image coinImg = coinIcon.getImage();
                     g2.drawImage(coinImg, 295, 30, 50, 50, this);
 
                     //Score
-                    ImageIcon scoreIcon = new ImageIcon("src/resources/others/numbers/" + score +"00.png");
+                    ImageIcon scoreIcon = new ImageIcon("src/resources/numbers/" + score +"00.png");
                     Image scoreImg = scoreIcon.getImage();
                     g2.drawImage(scoreImg, 483, 30, 75, 50, this);
 
                     //Level
-                    ImageIcon levelIcon = new ImageIcon("src/resources/others/numbers/"+level+".png");
+                    ImageIcon levelIcon = new ImageIcon("src/resources/numbers/"+level+".png");
                     Image levelImg = levelIcon.getImage();
                     g2.drawImage(levelImg, 695, 30, 50, 50, this);
 
                     //Peach
-                    ImageIcon peachIcon = new ImageIcon("src/resources/others/peach.png");
+                    ImageIcon peachIcon = new ImageIcon("src/resources/characters/peach.png");
                     Image peachImage = peachIcon.getImage();
                     g2.drawImage(peachImage, 500, 450, 35, 50, this);
 
@@ -651,11 +651,11 @@ public class Frame extends JFrame {
                                     if (gameObject.isNotCollected()) {
                                         if (gameObject.contains().equals("coin")) {
                                             extraItems.add(new GameObject(gameObject.getLeftX() + 10, gameObject.getTopY() - 40, 30, 40));
-                                            extraItems.get(0).setImage("src/resources/others/coin.png");
+                                            extraItems.get(0).setImage("src/resources/items/coin.png");
                                             objectArray.add(extraItems.get(extraItems.size() - 1));
                                             coins++;
                                             if (level == 0) {
-                                                tutorialArray.get(6).setImage("src/resources/others/Welcome/coin.png");
+                                                tutorialArray.get(6).setImage("src/resources/welcome/coin.png");
                                             }
                                         }
                                         gameObject.powerup();
@@ -723,7 +723,6 @@ public class Frame extends JFrame {
 
     public void winnerCollisions(){
         mario.setCanMoveDown(mario.getBottomY() + 20 <= ground.get(0).get(0).getTopY());
-
             if (!bowser.isHidden()) {
                 if (mario.getRightX() > bowser.getLeftX() && mario.getLeftX() < bowser.getRightX()) {
                     if (mario.getBottomY()+20 > bowser.getTopY() && mario.getBottomY() < bowser.getTopY()) {

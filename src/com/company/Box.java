@@ -18,18 +18,18 @@ public class Box extends GameObject {
 
     public String image(){
         if (contain.equals("block")){
-            return ("src/resources/others/block.png");
+            return ("src/resources/items/block.png");
         } else if (contain.equals("none") && !hidden) {
-            return ("src/resources/others/brick.png");
+            return ("src/resources/items/brick.png");
         } else if(!contain.equals("none") && collected){
-            return ("src/resources/others/box.png");
+            return ("src/resources/items/box.png");
         }else{
             if (flicker%40 > 20) {
                 flicker++;
-                return ("src/resources/others/box.png");
+                return ("src/resources/items/box.png");
             } else {
                 flicker++;
-                return ("src/resources/others/questionBox.png");
+                return ("src/resources/items/questionBox.png");
             }
         }
     }

@@ -14,10 +14,10 @@
 
 3300, 100
 
-250, 100, 250, 250, src/resources/others/Welcome/keys.png
-700, 100, 250, 250, src/resources/others/Welcome/up.png
-950, 100, 250, 250, src/resources/others/Welcome/goomba.png
-1200, 100, 250, 250, src/resources/others/Welcome/youKill.png
-1550, 100, 250, 250, src/resources/others/Welcome/obstacles.png
-2000, 100, 250, 250, src/resources/others/Welcome/boxes.png
-2650, 100, 250, 250, src/resources/others/Welcome/score.png
+250, 100, 250, 250, src/resources/welcome/keys.png
+700, 100, 250, 250, src/resources/welcome/up.png
+950, 100, 250, 250, src/resources/welcome/goomba.png
+1200, 100, 250, 250, src/resources/welcome/youKill.png
+1550, 100, 250, 250, src/resources/welcome/obstacles.png
+2000, 100, 250, 250, src/resources/welcome/boxes.png
+2650, 100, 250, 250, src/resources/welcome/score.png
