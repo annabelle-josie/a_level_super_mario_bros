@@ -201,6 +201,11 @@ public class Frame extends JFrame {
                         bowserIcon = new ImageIcon("src/resources/defeat.png"); //Bowser is defeated
                     }
                 } else{ //After past Peach, restart the game
+                    try {
+                        Thread.sleep(500); //Wait stops the game looking like it has ended suddenly. Gives the player a chance to see what they did
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                     screen="startScreen";
                 }
                 canvas.repaint();
@@ -216,7 +221,9 @@ public class Frame extends JFrame {
                     screen = "gameOver"; //Screen switches
                 }
             } else {
-                collisionDetection(); //Check for all collisions and correct them
+                if(!screen.equals("startScreen") && !screen.equals("levelSelect")) {
+                    collisionDetection(); //Check for all collisions and correct them
+                }
                 /*Animations*/
                 if (!extraItems.isEmpty()) {
                     if (extraItems.get(0).jump()) {
@@ -304,7 +311,6 @@ public class Frame extends JFrame {
     class PaintSurface extends JComponent {
         PaintSurface() {
         }
-
         public void paint(Graphics g) {
             Graphics2D g2 = (Graphics2D) g;
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -593,7 +599,7 @@ public class Frame extends JFrame {
         //At a certain X value at a given time...
         //Maybe another attribute in the class? e.g. object Number...
         //OOOOh, that might work!
-        //Coming back to it later though as currently working on the boxes and have spend far too long going down rabbit
+        //Coming back to it later though as currently working on the boxes and have spent far too long going down rabbit
         //holes. uhsgh;rshgusgrithsiphfgs
         //Current brick * 50 is the original x value of the block
 
