@@ -5,9 +5,12 @@ public class Mario extends Character {
     private String theImage;
     private int number;
     private String direction = "right";
+
     private String[] leftMarioSet = {"src/resources/left/smallW1.png", "src/resources/left/smallW2.png", "src/resources/left/smallW3.png", "src/resources/left/smallStand.png"};
     private String[] rightMarioSet = {"src/resources/right/smallW1.png", "src/resources/right/smallW2.png", "src/resources/right/smallW3.png", "src/resources/right/smallStand.png"};
+
     private int jumpCount;
+
 
     public Mario (String image, int xIN, int yIN, int wIN, int hIN){
         super(xIN, yIN, wIN, hIN);

@@ -371,6 +371,7 @@ public class Frame extends JFrame {
                     Image levelImg = levelIcon.getImage();
                     g2.drawImage(levelImg, 695, 30, 50, 50, this);
 
+                    //Additional images (information for tutorial)
                     for (GameObject gameObject : tutorialArray) {
                         ImageIcon theIcon = new ImageIcon(gameObject.image());
                         Image theImage = theIcon.getImage();
@@ -499,17 +500,28 @@ public class Frame extends JFrame {
 
         public void keyPressed(KeyEvent e) {
             switch (e.getKeyCode()) {
-                case 16: //shift, only for debugging DELETE BEFORE HANDING IN
-                    screen = "level";
-                    level = 2;
-                    resetLevel();
+                /*Movement*/
+                case 37: //Left Arrow Key - Move Left
+                    Frame.lkd = true;
                     break;
-                case 32: //Space Key
+                case 38: //Up Arrow Key - Jump (if not already jumping)
+                    if (!jumping) {
+                        //Frame.ukd = true;
+                        mario.setJumpCount(0);
+                        jumping = true;
+                        up = true;
+                    }
+                    break;
+                case 39: //Right Arrow Key - Move Right
+                    Frame.rkd = true;
+                    break;
+                case 32: //Space Key - Change screen and jump
                     switch (screen) {
                         case "startScreen" -> screen = "levelSelect";
                         case "levelSelect" -> {
                             if (transparentPlacement == 310) {
-                                level = 0; //special for tutorial?
+                                //The placement of the box determines which level should be loaded
+                                level = 0;
                             } else {
                                 level = 1;
                             }
@@ -522,6 +534,7 @@ public class Frame extends JFrame {
                             resetLevel();
                         }
                         case "level" ->{
+                        //Can be used to make character jump after stakeholder feedback (see notes)
                             if (!jumping) {
                                 //Frame.ukd = true;
                                 mario.setJumpCount(0);
@@ -531,6 +544,7 @@ public class Frame extends JFrame {
                         }
                     }
                     break;
+                /*Other Controls*/
                 case 48: //0 key
                     if(screen.equals("levelSelect")){
                         transparentPlacement = 310;
@@ -541,41 +555,34 @@ public class Frame extends JFrame {
                         transparentPlacement = 335;
                     }
                     break;
-                case 37: //Left Arrow Key
-                    Frame.lkd = true;
-                    break;
-                case 38: //Up Arrow Key
-                    if (!jumping) {
-                        //Frame.ukd = true;
-                        mario.setJumpCount(0);
-                        jumping = true;
-                        up = true;
-                    }
-                    break;
-                case 39: //Right Arrow Key
-                    Frame.rkd = true;
-                    break;
-                case 68: //D Key
-                    gameOver = true;
-                    break;
-                case 77: //M Key
+                case 77: //M Key - Load the menu
                     screen = "levelSelect";
                     score = 0;
                     coins = 0;
                     break;
-                case 82: //R Key
+                case 82: //R Key - Restart
                     gameOver = false;
                     resetLevel();
                     screen = "level";
                     score = 0;
                     coins = 0;
                     break;
-                case 87: //W key
+                /*Testing Tools - Would be deleted before publishing game*/
+                case 16: //Shift - For testing
+                    screen = "level";
+                    level = 2;
+                    resetLevel();
+                    break;
+                case 68: //D Key - Testing tool to force Mario to die
+                    gameOver = true;
+                    break;
+                case 87: //W key - Testing Tool loads winner sequence
                     level=500;
                     resetLevel();
                     break;
             }
         }
+
 
         public void keyReleased(KeyEvent e) {
             switch (e.getKeyCode()) {
@@ -661,7 +668,7 @@ public class Frame extends JFrame {
                                             objectArray.add(extraItems.get(extraItems.size() - 1));
                                             coins++;
                                             if (level == 0) {
-                                                tutorialArray.get(6).setImage("src/resources/welcome/coin.png");
+                                                tutorialArray.get(7).setImage("src/resources/welcome/coin.png");
                                             }
                                         }
                                         gameObject.powerup();
