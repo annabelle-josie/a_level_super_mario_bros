@@ -5,7 +5,7 @@ A new line is then left and the next inputs are for pipes, with 4 inputs, for x,
 Note: The height must be below the top of the bricks (400, I think... Will check)
 
 A new line is then left and next inputs are for holes
-The bricks are instantiated automatically, it is only the gaps between then (hidden bricks) that need to be listed here.
+The bricks are instantiated automatically, it is only the gaps between them (hidden bricks) that need to be listed here.
 Each number will spawn a gap of 2 bricks e.g. 5 would make bricks 5 and 6 hidden
 To find in from desired y position, divide by 50
 
@@ -23,9 +23,9 @@ the format src/resources/others/Welcome/keys.png
 Last is the tutorial part
 
 Order:
-- Goomba
-- Pipe
-- Hole
-- Box
-- Castle
-- Static Images e.g. for array
+- Goomba (x, y)
+- Pipe (x, y, w, h)
+- Hole (ground number)
+- Box (x, y, contents)
+- Castle (x, y)
+- Static Images e.g. for tutorial
